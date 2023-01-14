@@ -1,0 +1,1 @@
+export const fuck = 2;

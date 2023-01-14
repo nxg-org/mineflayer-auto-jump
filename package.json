@@ -1,0 +1,18 @@
+{
+  "name": "auto-jumper",
+  "version": "0.0.1",
+  "description": "Auto-jumper for mineflayer.",
+  "main": "lib/index.js",
+  "repository": "https://github.com/nxg-org/mineflayer-auto-jump.git",
+  "author": "GenerelSchwerz <xXSG.KingXx@gmail.com>",
+  "license": "GPL-3.0",
+  "private": false,
+  "scripts": {
+    "build": "npx tsc",
+    "test": "ts-node src/index.ts",
+    "start": "node lib/index.js"
+  },
+  "devDependencies": {
+    "typescript": "^4.9.4"
+  }
+}

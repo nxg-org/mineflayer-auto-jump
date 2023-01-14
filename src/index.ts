@@ -1,0 +1,1 @@
+import { fuck } from "./util/index";
