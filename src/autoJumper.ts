@@ -12,20 +12,11 @@ interface JumpCheckerEvents {
 
 type JumpCheckerEmitter = StrictEventEmitter<EventEmitter, JumpCheckerEvents>;
 
-export class JumpChecker extends (EventEmitter as {new(): JumpCheckerEmitter}) {
+export class JumpChecker {
 
-  private _resultCached: boolean;
-
-  private _shouldJump: boolean = false;
 
 
   public constructor(private bot: Bot) {
-    super();
-
-    // bot has updated physics and nothing else yet.
-    this.bot.prependListener("physicsTick", () => {
-      this._resultCached = false;
-    })
   }
 
 
@@ -35,9 +26,6 @@ export class JumpChecker extends (EventEmitter as {new(): JumpCheckerEmitter}) {
    * As the check for jumping may potentially be computationally heavy (it is not)
    */
   public shouldJump(): boolean {
-    if (this._resultCached) {
-      return this._shouldJump;
-    }
 
     // TODO
     throw new Error("not yet");
