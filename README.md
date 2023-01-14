@@ -1,0 +1,1 @@
+# mineflayer-auto-jump
