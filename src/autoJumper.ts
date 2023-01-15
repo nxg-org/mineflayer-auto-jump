@@ -170,7 +170,6 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
   
     if (jumpState.position.y < this.bot.entity.position.y) return false;
     const maxAge = ectx.state.speed > 1 ? jumpState.age - Math.round(Math.log2((ectx.state.speed - 1) * 3)) : jumpState.age;
-    console.log(maxAge)
     const ectx1 = EPhysicsCtx.FROM_BOT(this.ctx, this.bot);
     const runState = this.simulateUntil(
       (state, ticks) => {
