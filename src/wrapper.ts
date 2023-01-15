@@ -23,9 +23,9 @@ type AutoJumperEmitter = StrictEventEmitter<EventEmitter, AutoJumperEvents>;
 
 export class AutoJumper extends (EventEmitter as { new (): AutoJumperEmitter }) implements AutoJumperOpts {
   private handler: JumpChecker;
-  private lastJump: boolean;
+  private lastJump: boolean = false;
 
-  private _autoJump: boolean;
+  private _autoJump: boolean = false;
 
   public get autoJump() {
     return this._autoJump;
