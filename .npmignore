@@ -1,0 +1,9 @@
+# specifically shouldn't be published to npm
+.gitignore
+.github/
+src/
+lib/example.*
+tsconfig.json
+yarn.lock
+yarn-error.log
+push.sh

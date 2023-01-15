@@ -23,6 +23,7 @@ const sleep = (ms: number) => new Promise((res, rej) => setTimeout(res, ms))
 
 export class AutoJumper extends (EventEmitter as { new (): AutoJumperEmitter }) implements AutoJumperOpts {
   private handler: JumpChecker;
+  private lastJump: boolean;
 
   private _autoJump: boolean;
 
@@ -77,12 +78,17 @@ export class AutoJumper extends (EventEmitter as { new (): AutoJumperEmitter }) 
 
   private jumpListener = async () => {
     if (this.handler.shouldJump()) {
-      this.emit("shouldJump");
+      if (!this.lastJump) {
+        this.emit("shouldJump");
+        this.lastJump = true;
+      }
       this.bot.setControlState("jump", true);
-      await sleep(100);
       this.bot.setControlState("jump", false);
-      return;
+    } else {
+      if (this.lastJump) this.lastJump = false;
     }
+
+
   };
 
   private initListeners() {
