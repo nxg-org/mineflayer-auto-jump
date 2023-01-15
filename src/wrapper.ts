@@ -1,7 +1,8 @@
+import { EntityPhysics } from "@nxg-org/mineflayer-physics-util";
 import EventEmitter from "events";
 import { Bot } from "mineflayer";
 import StrictEventEmitter from "strict-event-emitter-types/types/src/index";
-import { JumpChecker } from "./autoJumper";
+import { defaultHandlerKeys, JumpChecker, JumpCheckerOpts } from "./autoJumper";
 
 interface AutoJumperEvents {
   shouldJump: () => void;
@@ -9,7 +10,7 @@ interface AutoJumperEvents {
 
 type AutoJumperEmitter = StrictEventEmitter<EventEmitter, AutoJumperEvents>;
 
-export interface AutoJumperOpts {
+export interface AutoJumperOpts{
   autoJump: boolean;
 }
 
@@ -17,8 +18,12 @@ const defaultKeys: AutoJumperOpts = {
   autoJump: false,
 };
 
+
+const sleep = (ms: number) => new Promise((res, rej) => setTimeout(res, ms))
+
 export class AutoJumper extends (EventEmitter as { new (): AutoJumperEmitter }) implements AutoJumperOpts {
   private handler: JumpChecker;
+
 
   private _autoJump: boolean;
 
@@ -27,11 +32,9 @@ export class AutoJumper extends (EventEmitter as { new (): AutoJumperEmitter }) 
   }
 
   public set autoJump(jump: boolean) {
-    if (jump) {
-      this.initListeners();
-    } else {
-      this.cleanupListeners();
-    }
+    if (jump)  this.initListeners();
+    else       this.cleanupListeners();
+
     this._autoJump = jump;
   }
 
@@ -41,23 +44,40 @@ export class AutoJumper extends (EventEmitter as { new (): AutoJumperEmitter }) 
     this.setOpts(Object.assign({}, defaultKeys, opts));
   }
 
+  public enable() {
+    this.setOpts({autoJump: true})
+  }
+  
+  public disable() {
+    this.setOpts({autoJump: false})
+  }
+
+
   /**
    * Set options straight to the class, inducing setters.
    * @param opts Options.
    */
-  public setOpts(opts: Partial<AutoJumperOpts>) {
+  public setOpts(opts: Partial<AutoJumperOpts & JumpCheckerOpts>) {
     for (const key in opts) {
       if (key in this && key in defaultKeys) {
         // @ts-expect-error
         this[key] = opts[key];
       }
+      if (key in this.handler && key in defaultHandlerKeys) {
+         // @ts-expect-error
+        this.handler[key] = opts[key]
+      }
     }
   }
 
-  private jumpListener = () => {
+
+
+  private jumpListener = async () => {
     if (this.handler.shouldJump()) {
       this.emit("shouldJump");
-      // TODO: perform jump.
+      this.bot.setControlState("jump", true);
+      await sleep(100);
+      this.bot.setControlState("jump", false);
       return;
     }
   };
