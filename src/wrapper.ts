@@ -24,7 +24,6 @@ const sleep = (ms: number) => new Promise((res, rej) => setTimeout(res, ms))
 export class AutoJumper extends (EventEmitter as { new (): AutoJumperEmitter }) implements AutoJumperOpts {
   private handler: JumpChecker;
 
-
   private _autoJump: boolean;
 
   public get autoJump() {
@@ -65,7 +64,11 @@ export class AutoJumper extends (EventEmitter as { new (): AutoJumperEmitter }) 
       }
       if (key in this.handler && key in defaultHandlerKeys) {
          // @ts-expect-error
+        console.log(key, opts[key])
+         // @ts-expect-error
         this.handler[key] = opts[key]
+         // @ts-expect-error
+         console.log(this.handler[key])
       }
     }
   }

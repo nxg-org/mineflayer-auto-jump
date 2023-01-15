@@ -5,18 +5,18 @@ import { ControlStateHandler } from "@nxg-org/mineflayer-physics-util/lib/physic
 
 
 export interface JumpCheckerOpts {
-  edgeToWaterOnly: boolean
+  edgeToLiquidOnly: boolean
 }
 
 
 export const defaultHandlerKeys: JumpCheckerOpts = {
-  edgeToWaterOnly: false
+  edgeToLiquidOnly: false
 }
 
 export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
 
 
-  public edgeToWaterOnly: boolean = false;
+  public edgeToLiquidOnly: boolean = false;
 
   public constructor(private bot: Bot) {
     super(new EntityPhysics((bot as any).registry));
@@ -25,7 +25,9 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
 
   public shouldJump() {
     if (this.bot.getControlState("back") || this.bot.getControlState("forward") || this.bot.getControlState("left") || this.bot.getControlState("right") ) {
-      if (this.dontJumpSinceCantClear() || this.dontJumpSinceNotSafe()) return false;
+      if (this.dontJumpSinceCantClear()) { 
+        return false;
+      }
       return this.shouldJumpFromCollision() || this.shouldJumpSinceBlockEdge();
     }
     return false;
@@ -41,16 +43,17 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
 
     ectx.state.controlState.set("jump", true);
    
+    let flag = false;
     const nextTick = this.simulateUntil(
-      (state) => { return state.velocity.y < -0.3 },
+      (state) => { return state.velocity.y < -0.3 || (flag && state.onGround) },
       (state) => {},
-      (state, ticks) => {},
+      (state, ticks) => { if (ticks === 1) flag = true },
       ectx,
       this.bot.world,
       999 // unneeded since we'll always be reaching our goal relatively easily.
     );
 
-    return nextTick.isCollidedHorizontally;
+    return nextTick.isCollidedHorizontally && Math.floor(nextTick.position.x) === Math.floor(this.bot.entity.position.x);
   }
 
   protected dontJumpSinceNotSafe() {
@@ -117,7 +120,18 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
    */
   protected shouldJumpSinceBlockEdge(): boolean {
     const nextTick = this.predictForward(this.bot.entity, this.bot.world, 1, this.bot.controlState as any);
-    return !nextTick.onGround
+
+    if (this.edgeToLiquidOnly) {
+      const cursor = nextTick.position;
+      for (; cursor.y > 0; cursor.y--) {
+        const block = this.bot.blockAt(nextTick.position);
+        if (block.type === this.bot.registry.blocksByName.air.id) continue;
+        if (!isNaN(Number(block?.getProperties()["level"]))) return true;
+      }
+      return false;
+    }
+
+    return !nextTick.onGround;
   }
 
 }

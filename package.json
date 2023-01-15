@@ -19,8 +19,5 @@
   "dependencies": {
     "@nxg-org/mineflayer-physics-util": "^1.3.2",
     "strict-event-emitter-types": "^2.0.0"
-  },
-  "resolutions": {
-    "@nxg-org/mineflayer-physics-util": "file:/home/generel/Documents/vscode/javascript/mineflayer-plugins/physics-utils"
   }
 }
