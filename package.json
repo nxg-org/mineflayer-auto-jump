@@ -9,7 +9,8 @@
   "private": false,
   "type": "commonjs",
   "files": [
-    "dist/"
+    "dist/",
+    "package.json"
   ],
 
   "repository": {
