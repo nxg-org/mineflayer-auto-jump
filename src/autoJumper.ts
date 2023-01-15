@@ -18,7 +18,7 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
   public minimizeFallDmg: boolean = false;
 
   public constructor(private bot: Bot) {
-    super(new EntityPhysics((bot as any).registry));
+    super(new EntityPhysics(bot.registry));
   }
 
   public shouldJump() {
@@ -45,7 +45,7 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
    */
   protected dontJumpSinceCantClear() {
     const ectx = EPhysicsCtx.FROM_ENTITY(this.ctx, this.bot.entity);
-    ectx.state.controlState = ControlStateHandler.COPY_BOT(this.bot as any);
+    ectx.state.controlState = ControlStateHandler.COPY_BOT(this.bot);
     ectx.state.controlState.set("jump", true);
 
     const nextTick = this.simulateUntil(
@@ -75,8 +75,6 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
   protected shouldJumpFromCollision(): boolean {
     const ectx = EPhysicsCtx.FROM_ENTITY(this.ctx, this.bot.entity);
     ectx.state.controlState = this.bot.controlState as any;
-
-    // console.log(ectx.state.controlState);
 
     let minAge = 7;
 
@@ -126,7 +124,7 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
     if (!this.shouldJumpSinceBlockEdge()) return false;
 
     const ectx = EPhysicsCtx.FROM_ENTITY(this.ctx, this.bot.entity);
-    ectx.state.controlState = ControlStateHandler.COPY_BOT(this.bot as any);
+    ectx.state.controlState = ControlStateHandler.COPY_BOT(this.bot);
     ectx.state.controlState.set("jump", true);
 
     const nextTick = this.simulateUntil(

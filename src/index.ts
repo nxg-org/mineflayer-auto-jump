@@ -15,6 +15,6 @@ declare module "mineflayer" {
 
 
 export function loader(bot: Bot) {
-    initSetup((bot as any).registry);
+    initSetup(bot.registry);
     bot.autoJumper = new AutoJumper(bot);
 }
