@@ -28,8 +28,9 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
       }
       return (
         this.shouldJumpFromCollision() ||
+        (this.jumpIntoWater ? this.shouldJumpIntoWater() : false) ||
         this.shouldJumpSinceNextBlockEmptyAndAvailableBlock() ||
-        (this.jumpOnEdge ? this.shouldJumpSinceBlockEdge() : this.jumpIntoWater ? this.shouldJumpIntoWater() : false)
+        (this.jumpOnEdge ? this.shouldJumpSinceBlockEdge() : false)
       );
     }
     return false;

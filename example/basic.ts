@@ -4,7 +4,7 @@ import {loader} from "../src/index"
 
 const bot = createBot({
     host: "localhost",
-    port: 25566,
+    port: 25565,
     username: "autoJumper",
     auth: "offline"
 })
