@@ -4,11 +4,18 @@
   "description": "Auto-jump for mineflayer.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "repository": "https://github.com/nxg-org/mineflayer-auto-jump.git",
   "author": "GenerelSchwerz <xXSG.KingXx@gmail.com>",
   "license": "GPL-3.0",
   "private": false,
   "type": "commonjs",
+  "files": [
+    "dist/"
+  ],
+
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nxg-org/mineflayer-physics-util.git"
+},
   "scripts": {
     "build": "npx tsc",
     "test": "ts-node -T example/basic.ts",
