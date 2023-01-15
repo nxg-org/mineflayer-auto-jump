@@ -2,15 +2,17 @@ import { EventEmitter } from "events";
 import type { StrictEventEmitter } from "strict-event-emitter-types";
 
 export interface JumpCheckerOpts {
-  jumpOnEdge: boolean;
+  jumpOnAllEdges: boolean;
   jumpIntoWater: boolean;
+  jumpDownDescending: number;
   minimizeFallDmg: boolean;
   debug: boolean;
 }
 
 export const DefaultHandlerKeys: JumpCheckerOpts = {
-  jumpOnEdge: false,
+  jumpOnAllEdges: false,
   jumpIntoWater: false,
+  jumpDownDescending: 0,
   minimizeFallDmg: false,
   debug: false
 };
