@@ -17,6 +17,7 @@ bot.loadPlugin(loader);
 
 bot.on("spawn", () => {
     bot.autoJumper.enable();
+    bot.autoJumper.setOpts({debug: true})
 
     // bot.on("physicsTick", () => {
     //     if ((bot.entity as any).isCollidedHorizontally) {
