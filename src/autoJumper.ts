@@ -1,17 +1,12 @@
-import EventEmitter from "events";
+import { BaseSimulator, ControlStateHandler, EntityPhysics, EPhysicsCtx } from "@nxg-org/mineflayer-physics-util";
 import type { Bot } from "mineflayer";
-import { BaseSimulator, EntityPhysics, EPhysicsCtx } from "@nxg-org/mineflayer-physics-util";
-import { ControlStateHandler } from "@nxg-org/mineflayer-physics-util";
 
-export interface JumpCheckerOpts {
-  edgeToLiquidOnly: boolean;
-  minimizeFallDmg: boolean;
+import { JumpCheckerOpts } from "./utils";
+
+
+function tp({x,y,z}:{x:number,y:number,z:number}, ...args:any[]){
+  console.log(`${x} ${y} ${z}`, ...args)
 }
-
-export const defaultHandlerKeys: JumpCheckerOpts = {
-  edgeToLiquidOnly: false,
-  minimizeFallDmg: false,
-};
 
 export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
   public edgeToLiquidOnly: boolean = false;
@@ -29,6 +24,7 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
       this.bot.getControlState("right")
     ) {
       if (this.dontJumpSinceCantClear()) {
+        console.log("cant clear.")
         return false;
       }
       return (
@@ -44,15 +40,14 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
    * @returns
    */
   protected dontJumpSinceCantClear() {
-    const ectx = EPhysicsCtx.FROM_ENTITY(this.ctx, this.bot.entity);
-    ectx.state.controlState = ControlStateHandler.COPY_BOT(this.bot);
+    const ectx = EPhysicsCtx.FROM_BOT(this.ctx, this.bot);
     ectx.state.controlState.set("jump", true);
 
-    const nextTick = this.simulateUntil(
+    let simState = this.simulateUntil(
       (state, ticks) => {
         let flag = false;
         if (this.minimizeFallDmg) flag = state.velocity.y < -0.6;
-        return flag || (ticks > 1 && state.onGround);
+        return flag || (ticks > 0 && state.isCollidedVertically);
       },
       (state) => {},
       (state, ticks) => {},
@@ -61,9 +56,26 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
       999 // unneeded since we'll always be reaching our goal relatively easily.
     );
 
+    // if we collide with a block above us, we still don't know if we will make it or not.
+    // So continue simulating.
+    if (simState.isCollidedVertically && !simState.onGround) {
+      simState = this.simulateUntil(
+        (state, ticks) => {
+          let flag = false;
+          if (this.minimizeFallDmg) flag = state.velocity.y < -0.6;
+          return flag || (ticks > 0 && state.onGround);
+        },
+        (state) => {},
+        (state, ticks) => {},
+        ectx,
+        this.bot.world,
+        999 // unneeded since we'll always be reaching our goal relatively easily.
+      );
+    }
     let flag = false;
-    if (this.minimizeFallDmg) flag = nextTick.velocity.y < -0.6;
-    return flag || (nextTick.isCollidedHorizontally && Math.floor(nextTick.position.y) === Math.floor(this.bot.entity.position.y));
+    if (this.minimizeFallDmg) flag = flag || simState.velocity.y < -0.6;
+    console.log(simState.position.y, this.bot.entity.position.y)
+    return flag || Math.floor(simState.position.y) === Math.floor(this.bot.entity.position.y);
   }
 
   /**
@@ -123,8 +135,7 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
     // if (!isNaN(Number(this.bot.blockAt(this.bot.entity.position.offset(0, -0.251, 0))?.getProperties()["level"]))) return false;
     if (!this.shouldJumpSinceBlockEdge()) return false;
 
-    const ectx = EPhysicsCtx.FROM_ENTITY(this.ctx, this.bot.entity);
-    ectx.state.controlState = ControlStateHandler.COPY_BOT(this.bot);
+    const ectx = EPhysicsCtx.FROM_BOT(this.ctx, this.bot);
     ectx.state.controlState.set("jump", true);
 
     const nextTick = this.simulateUntil(

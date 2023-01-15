@@ -1,25 +1,8 @@
-import { EntityPhysics } from "@nxg-org/mineflayer-physics-util";
-import { EventEmitter} from "events";
-import { Bot } from "mineflayer";
-import { StrictEventEmitter } from "strict-event-emitter-types";
-import { defaultHandlerKeys, JumpChecker, JumpCheckerOpts } from "./autoJumper.js";
+import { EventEmitter } from "events";
+import type { Bot } from "mineflayer";
 
-
-export interface AutoJumperOpts{
-  enabled: boolean;
-}
-
-const DefaultKeys: AutoJumperOpts = {
-  enabled: false,
-};
-
-
-interface AutoJumperEvents {
-  shouldJump: () => void;
-}
-
-type AutoJumperEmitter = StrictEventEmitter<EventEmitter, AutoJumperEvents>;
-
+import { JumpChecker } from "./autoJumper";
+import { AutoJumperEmitter, AutoJumperOpts, DefaultHandlerKeys, DefaultKeys, JumpCheckerOpts } from "./utils";
 
 export class AutoJumper extends (EventEmitter as { new (): AutoJumperEmitter }) implements AutoJumperOpts {
   private handler: JumpChecker;
@@ -31,8 +14,8 @@ export class AutoJumper extends (EventEmitter as { new (): AutoJumperEmitter }) 
   }
 
   public set enabled(enable: boolean) {
-    if (enable)  this.bot.on("physicsTick", this.jumpListener);
-    else        this.bot.off("physicsTick", this.jumpListener);
+    if (enable)   this.bot.on("physicsTick", this.jumpListener);
+    else          this.bot.off("physicsTick", this.jumpListener);
 
     this._enabled = enable;
   }
@@ -46,7 +29,7 @@ export class AutoJumper extends (EventEmitter as { new (): AutoJumperEmitter }) 
   public enable() {
     this.enabled = true;
   }
-  
+
   public disable() {
     this.enabled = false;
   }
@@ -61,14 +44,12 @@ export class AutoJumper extends (EventEmitter as { new (): AutoJumperEmitter }) 
         // @ts-expect-error
         this[key] = opts[key];
       }
-      if (key in this.handler && key in defaultHandlerKeys) {
+      if (key in this.handler && key in DefaultHandlerKeys) {
         // @ts-expect-error
-        this.handler[key] = opts[key]
+        this.handler[key] = opts[key];
       }
     }
   }
-
-
 
   private jumpListener = async () => {
     if (this.handler.shouldJump()) {
@@ -79,9 +60,9 @@ export class AutoJumper extends (EventEmitter as { new (): AutoJumperEmitter }) 
       this.bot.setControlState("jump", true);
       this.bot.setControlState("jump", false);
     } else {
-      if (this.lastJump) this.lastJump = false;
+      if (this.lastJump) {
+        this.lastJump = false;
+      }
     }
-
-
   };
 }

@@ -1,7 +1,7 @@
 import type { Bot } from "mineflayer"
 import type { IndexedData } from "minecraft-data"
 import { initSetup } from "@nxg-org/mineflayer-physics-util"
-import { AutoJumper } from "./wrapper.js"
+import { AutoJumper } from "./wrapper"
 
 declare module "mineflayer" {
 

@@ -18,11 +18,11 @@ bot.loadPlugin(loader);
 bot.on("spawn", () => {
     bot.autoJumper.enable();
 
-    bot.on("physicsTick", () => {
-        if ((bot.entity as any).isCollidedHorizontally) {
-            console.log("We're hit!")
-        }
-    })
+    // bot.on("physicsTick", () => {
+    //     if ((bot.entity as any).isCollidedHorizontally) {
+    //         console.log("We're hit!")
+    //     }
+    // })
     bot.on("chat", (username, message) => {
         let [cmd, ...args] = message.split(' ');
         switch (cmd) {
