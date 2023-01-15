@@ -6,11 +6,11 @@ import { defaultHandlerKeys, JumpChecker, JumpCheckerOpts } from "./autoJumper.j
 
 
 export interface AutoJumperOpts{
-  autoJump: boolean;
+  enabled: boolean;
 }
 
 const DefaultKeys: AutoJumperOpts = {
-  autoJump: false,
+  enabled: false,
 };
 
 
@@ -25,17 +25,17 @@ export class AutoJumper extends (EventEmitter as { new (): AutoJumperEmitter }) 
   private handler: JumpChecker;
   private lastJump: boolean = false;
 
-  private _autoJump: boolean = false;
+  private _enabled: boolean = false;
 
-  public get autoJump() {
-    return this._autoJump;
+  public get enabled() {
+    return this._enabled;
   }
 
-  public set autoJump(jump: boolean) {
+  public set enabled(jump: boolean) {
     if (jump)  this.initListeners();
     else       this.cleanupListeners();
 
-    this._autoJump = jump;
+    this._enabled = jump;
   }
 
   public constructor(private bot: Bot, opts: Partial<AutoJumperOpts> = {}) {
@@ -45,13 +45,12 @@ export class AutoJumper extends (EventEmitter as { new (): AutoJumperEmitter }) 
   }
 
   public enable() {
-    this.setOpts({autoJump: true})
+    this.enabled = true;
   }
   
   public disable() {
-    this.setOpts({autoJump: false})
+    this.enabled = false;
   }
-
 
   /**
    * Set options straight to the class, inducing setters.
