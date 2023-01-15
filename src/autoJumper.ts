@@ -1,5 +1,4 @@
-import { BaseSimulator, ControlStateHandler, EntityPhysics, EPhysicsCtx } from "@nxg-org/mineflayer-physics-util";
-import { CheapEffects } from "@nxg-org/mineflayer-physics-util/dist/util/physicsUtils";
+import { BaseSimulator, EntityPhysics, EPhysicsCtx } from "@nxg-org/mineflayer-physics-util";
 import type { Bot } from "mineflayer";
 
 import { JumpCheckerOpts } from "./utils";
@@ -142,6 +141,8 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
     return nextTick.age < minAge;
   }
 
+
+
   /**
    * Note: this is purposefully cheap.
    * @returns Should we jump or not, depending on leaving edge of block to fall.
@@ -166,10 +167,10 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
       30 // end of jump.
     );
 
+  
     if (jumpState.position.y < this.bot.entity.position.y) return false;
-
-
-    const maxAge = jumpState.age - Math.round(Math.log2((ectx.state.speed - 1) * 3));
+    const maxAge = ectx.state.speed > 1 ? jumpState.age - Math.round(Math.log2((ectx.state.speed - 1) * 3)) : jumpState.age;
+    console.log(maxAge)
     const ectx1 = EPhysicsCtx.FROM_BOT(this.ctx, this.bot);
     const runState = this.simulateUntil(
       (state, ticks) => {

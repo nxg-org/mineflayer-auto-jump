@@ -1,10 +1,11 @@
 import {createBot} from "mineflayer"
+import { JumpChecker } from "../src/autoJumper";
 import {loader} from "../src/index"
 
 
 const bot = createBot({
     host: "localhost",
-    port: 25565,
+    port: 25566,
     username: "autoJumper",
     auth: "offline"
 })
@@ -19,11 +20,7 @@ bot.on("spawn", () => {
     bot.autoJumper.enable();
     bot.autoJumper.setOpts({debug: true})
 
-    // bot.on("physicsTick", () => {
-    //     if ((bot.entity as any).isCollidedHorizontally) {
-    //         console.log("We're hit!")
-    //     }
-    // })
+
     bot.on("chat", (username, message) => {
         let [cmd, ...args] = message.split(' ');
         switch (cmd) {
