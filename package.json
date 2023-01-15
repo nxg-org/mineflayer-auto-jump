@@ -1,6 +1,6 @@
 {
   "name": "auto-jumper",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Auto-jumper for mineflayer.",
   "main": "lib/index.js",
   "repository": "https://github.com/nxg-org/mineflayer-auto-jump.git",
