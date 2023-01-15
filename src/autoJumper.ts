@@ -56,6 +56,7 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
       999 // unneeded since we'll always be reaching our goal relatively easily.
     );
 
+    let flag = false;
     // if we collide with a block above us, we still don't know if we will make it or not.
     // So continue simulating.
     if (simState.isCollidedVertically && !simState.onGround) {
@@ -71,11 +72,11 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
         this.bot.world,
         999 // unneeded since we'll always be reaching our goal relatively easily.
       );
+      flag = simState.isCollidedHorizontally;
     }
-    let flag = false;
+  
     if (this.minimizeFallDmg) flag = flag || simState.velocity.y < -0.6;
-    console.log(simState.position.y, this.bot.entity.position.y)
-    return flag || Math.floor(simState.position.y) === Math.floor(this.bot.entity.position.y);
+    return flag || Math.floor(simState.position.y) >= Math.floor(this.bot.entity.position.y);
   }
 
   /**

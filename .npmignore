@@ -4,6 +4,3 @@
 src/
 example/
 tsconfig.json
-yarn.lock
-yarn-error.log
-push.sh
