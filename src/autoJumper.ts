@@ -3,13 +3,13 @@ import type { Bot } from "mineflayer";
 
 import { JumpCheckerOpts } from "./utils";
 
-
-function tp({x,y,z}:{x:number,y:number,z:number}, ...args:any[]){
-  console.log(`${x} ${y} ${z}`, ...args)
+function tp({ x, y, z }: { x: number; y: number; z: number }, ...args: any[]) {
+  console.log(`${x} ${y} ${z}`, ...args);
 }
 
 export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
-  public edgeToLiquidOnly: boolean = false;
+  public jumpOnEdge: boolean = false;
+  public jumpIntoWater: boolean = false;
   public minimizeFallDmg: boolean = false;
 
   public constructor(private bot: Bot) {
@@ -24,12 +24,12 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
       this.bot.getControlState("right")
     ) {
       if (this.dontJumpSinceCantClear()) {
-        console.log("cant clear.")
         return false;
       }
       return (
         this.shouldJumpFromCollision() ||
-        (this.edgeToLiquidOnly ? this.shouldJumpForWater() : this.shouldJumpSinceBlockEdge())
+        this.shouldJumpSinceNextBlockEmptyAndAvailableBlock() ||
+        (this.jumpOnEdge ? this.shouldJumpSinceBlockEdge() : this.jumpIntoWater ? this.shouldJumpIntoWater() : false)
       );
     }
     return false;
@@ -56,7 +56,8 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
       999 // unneeded since we'll always be reaching our goal relatively easily.
     );
 
-    tp(simState.position, "first sim", simState.isCollidedVertically, simState.onGround)
+    // tp(this.bot.entity.position, "original ");
+    // tp(simState.position, "first sim", simState.isCollidedVertically, simState.onGround)
     let flag = false;
     // if we collide with a block above us, we still don't know if we will make it or not.
     // So continue simulating.
@@ -65,7 +66,7 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
         (state, ticks) => {
           let flag = false;
           if (this.minimizeFallDmg) flag = state.velocity.y < -0.6;
-          return flag || (ticks > 0 && state.onGround);
+          return flag || (ticks > 0 && (state.onGround || simState.isCollidedHorizontally));
         },
         (state) => {},
         (state, ticks) => {},
@@ -73,12 +74,17 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
         this.bot.world,
         999 // unneeded since we'll always be reaching our goal relatively easily.
       );
-      console.log(simState.isCollidedHorizontally)
-      flag = simState.isCollidedHorizontally;
+      // tp(simState.position, "second sim", simState.isCollidedHorizontally, simState.isCollidedVertically)
+      return (
+        simState.isCollidedHorizontally || Math.floor(simState.position.y) <= Math.floor(this.bot.entity.position.y)
+      );
     }
-  
+
     if (this.minimizeFallDmg) flag = flag || simState.velocity.y < -0.6;
-    return flag || (simState.isCollidedHorizontally && Math.floor(simState.position.y) <= Math.floor(this.bot.entity.position.y));
+    return (
+      flag ||
+      (simState.isCollidedHorizontally && Math.floor(simState.position.y) <= Math.floor(this.bot.entity.position.y))
+    );
   }
 
   /**
@@ -126,6 +132,39 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
     return !nextTick.onGround;
   }
 
+  protected shouldJumpSinceNextBlockEmptyAndAvailableBlock() {
+    const ectx = EPhysicsCtx.FROM_BOT(this.ctx, this.bot);
+    ectx.state.controlState.set("jump", true);
+
+    const jumpState = this.simulateUntil(
+      (state, ticks) => {
+        return ticks > 0 && state.onGround;
+      },
+      (state) => {},
+      (state, ticks) => {},
+      ectx,
+      this.bot.world,
+      30 // end of jump.
+    );
+
+    if (jumpState.position.y < this.bot.entity.position.y) return false;
+
+    const ectx1 = EPhysicsCtx.FROM_BOT(this.ctx, this.bot);
+
+    const runState = this.simulateUntil(
+      (state, ticks) => {
+        return state.position.y < this.bot.entity.position.y;
+      },
+      (state) => {},
+      (state, ticks) => {},
+      ectx1,
+      this.bot.world,
+      jumpState.age // end of jump.
+    );
+
+    return jumpState.position.y >= this.bot.entity.position.y && runState.position.y < this.bot.entity.position.y;
+  }
+
   /**
    * Robust, expensive check for landable water.
    *
@@ -133,7 +172,7 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
    * and uncomment that line.
    * @returns
    */
-  protected shouldJumpForWater(): boolean {
+  protected shouldJumpIntoWater(): boolean {
     if ((this.bot.entity as any).isInWater) return false;
     // if (!isNaN(Number(this.bot.blockAt(this.bot.entity.position.offset(0, -0.251, 0))?.getProperties()["level"]))) return false;
     if (!this.shouldJumpSinceBlockEdge()) return false;
