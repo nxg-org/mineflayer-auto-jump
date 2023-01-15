@@ -4,22 +4,22 @@ import { Bot } from "mineflayer";
 import StrictEventEmitter from "strict-event-emitter-types/types/src/index";
 import { defaultHandlerKeys, JumpChecker, JumpCheckerOpts } from "./autoJumper";
 
+
+export interface AutoJumperOpts{
+  autoJump: boolean;
+}
+
+const DefaultKeys: AutoJumperOpts = {
+  autoJump: false,
+};
+
+
 interface AutoJumperEvents {
   shouldJump: () => void;
 }
 
 type AutoJumperEmitter = StrictEventEmitter<EventEmitter, AutoJumperEvents>;
 
-export interface AutoJumperOpts{
-  autoJump: boolean;
-}
-
-const defaultKeys: AutoJumperOpts = {
-  autoJump: false,
-};
-
-
-const sleep = (ms: number) => new Promise((res, rej) => setTimeout(res, ms))
 
 export class AutoJumper extends (EventEmitter as { new (): AutoJumperEmitter }) implements AutoJumperOpts {
   private handler: JumpChecker;
@@ -41,7 +41,7 @@ export class AutoJumper extends (EventEmitter as { new (): AutoJumperEmitter }) 
   public constructor(private bot: Bot, opts: Partial<AutoJumperOpts> = {}) {
     super();
     this.handler = new JumpChecker(bot);
-    this.setOpts(Object.assign({}, defaultKeys, opts));
+    this.setOpts(Object.assign({}, DefaultKeys, opts));
   }
 
   public enable() {
@@ -59,17 +59,13 @@ export class AutoJumper extends (EventEmitter as { new (): AutoJumperEmitter }) 
    */
   public setOpts(opts: Partial<AutoJumperOpts & JumpCheckerOpts>) {
     for (const key in opts) {
-      if (key in this && key in defaultKeys) {
+      if (key in this && key in DefaultKeys) {
         // @ts-expect-error
         this[key] = opts[key];
       }
       if (key in this.handler && key in defaultHandlerKeys) {
-         // @ts-expect-error
-        console.log(key, opts[key])
-         // @ts-expect-error
+        // @ts-expect-error
         this.handler[key] = opts[key]
-         // @ts-expect-error
-         console.log(this.handler[key])
       }
     }
   }
