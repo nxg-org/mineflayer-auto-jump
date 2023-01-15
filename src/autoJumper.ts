@@ -1,4 +1,5 @@
 import { BaseSimulator, ControlStateHandler, EntityPhysics, EPhysicsCtx } from "@nxg-org/mineflayer-physics-util";
+import { CheapEffects } from "@nxg-org/mineflayer-physics-util/dist/util/physicsUtils";
 import type { Bot } from "mineflayer";
 
 import { JumpCheckerOpts } from "./utils";
@@ -11,9 +12,19 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
   public jumpOnEdge: boolean = false;
   public jumpIntoWater: boolean = false;
   public minimizeFallDmg: boolean = false;
+  public debug: boolean = false;
 
   public constructor(private bot: Bot) {
     super(new EntityPhysics(bot.registry));
+  }
+
+
+  private deb(...any: any[]) {
+    if (this.debug) {
+      console.log(
+       ...any
+      )
+    }
   }
 
   public shouldJump() {
@@ -26,6 +37,13 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
       if (this.dontJumpSinceCantClear()) {
         return false;
       }
+
+      this.deb(
+        this.shouldJumpFromCollision(),
+        (this.jumpIntoWater ? this.shouldJumpIntoWater() : false),
+        this.shouldJumpSinceNextBlockEmptyAndAvailableBlock(),
+        (this.jumpOnEdge ? this.shouldJumpSinceBlockEdge() : false)
+      )
       return (
         this.shouldJumpFromCollision() ||
         (this.jumpIntoWater ? this.shouldJumpIntoWater() : false) ||
@@ -107,7 +125,7 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
       if (ectx.state.jumpBoost > 1) {
         base -= Math.ceil(ectx.state.jumpBoost / 2);
       }
-      minAge = base + Math.ceil(ectx.state.speed / 5);
+      minAge = base + Math.ceil(ectx.state.speed / 10);
     }
 
     const nextTick = this.simulateUntil(
@@ -150,20 +168,28 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
 
     if (jumpState.position.y < this.bot.entity.position.y) return false;
 
+    if (ectx.state.speed >= 3) {
+      return false;
+    }
+
     const ectx1 = EPhysicsCtx.FROM_BOT(this.ctx, this.bot);
 
+    let flag = false;
     const runState = this.simulateUntil(
       (state, ticks) => {
         return state.position.y < this.bot.entity.position.y;
       },
-      (state) => {},
+      (state) => { flag = true },
       (state, ticks) => {},
       ectx1,
       this.bot.world,
       jumpState.age // end of jump.
     );
 
-    return jumpState.position.y >= this.bot.entity.position.y && runState.position.y < this.bot.entity.position.y;
+    this.deb(runState.position.y, runState.age, jumpState.age)
+ 
+
+    return jumpState.position.y >= this.bot.entity.position.y && runState.position.y < this.bot.entity.position.y && !flag;
   }
 
   /**

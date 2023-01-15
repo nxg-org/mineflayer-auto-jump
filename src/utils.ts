@@ -5,12 +5,14 @@ export interface JumpCheckerOpts {
   jumpOnEdge: boolean;
   jumpIntoWater: boolean;
   minimizeFallDmg: boolean;
+  debug: boolean;
 }
 
 export const DefaultHandlerKeys: JumpCheckerOpts = {
   jumpOnEdge: false,
   jumpIntoWater: false,
   minimizeFallDmg: false,
+  debug: false
 };
 
 export interface AutoJumperOpts {
