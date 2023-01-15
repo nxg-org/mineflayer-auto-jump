@@ -24,18 +24,17 @@ type AutoJumperEmitter = StrictEventEmitter<EventEmitter, AutoJumperEvents>;
 export class AutoJumper extends (EventEmitter as { new (): AutoJumperEmitter }) implements AutoJumperOpts {
   private handler: JumpChecker;
   private lastJump: boolean = false;
-
   private _enabled: boolean = false;
 
   public get enabled() {
     return this._enabled;
   }
 
-  public set enabled(jump: boolean) {
-    if (jump)  this.initListeners();
-    else       this.cleanupListeners();
+  public set enabled(enable: boolean) {
+    if (enable)  this.bot.on("physicsTick", this.jumpListener);
+    else        this.bot.off("physicsTick", this.jumpListener);
 
-    this._enabled = jump;
+    this._enabled = enable;
   }
 
   public constructor(private bot: Bot, opts: Partial<AutoJumperOpts> = {}) {
@@ -85,12 +84,4 @@ export class AutoJumper extends (EventEmitter as { new (): AutoJumperEmitter }) 
 
 
   };
-
-  private initListeners() {
-    this.bot.on("physicsTick", this.jumpListener);
-  }
-
-  private cleanupListeners() {
-    this.bot.removeListener("physicsTick", this.jumpListener);
-  }
 }
