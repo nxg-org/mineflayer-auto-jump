@@ -1,8 +1,8 @@
 import { EntityPhysics } from "@nxg-org/mineflayer-physics-util";
-import EventEmitter from "events";
+import { EventEmitter} from "events";
 import { Bot } from "mineflayer";
-import StrictEventEmitter from "strict-event-emitter-types/types/src/index";
-import { defaultHandlerKeys, JumpChecker, JumpCheckerOpts } from "./autoJumper";
+import { StrictEventEmitter } from "strict-event-emitter-types";
+import { defaultHandlerKeys, JumpChecker, JumpCheckerOpts } from "./autoJumper.js";
 
 
 export interface AutoJumperOpts{

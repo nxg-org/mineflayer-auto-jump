@@ -2,6 +2,7 @@
 .gitignore
 .github/
 src/
+example/
 lib/example.*
 tsconfig.json
 yarn.lock

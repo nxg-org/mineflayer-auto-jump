@@ -38,8 +38,8 @@ bot.on("spawn", () => {
             case "setopts":
                 const opts: {[key: string]: boolean} = {};
                 args.map(a => {
-                    const [key, val] = a.split("="); return [key, val.toLowerCase() === 'true']
-                }).forEach(([key, val]: [string, boolean]) => opts[key] = val)
+                    const [key, val] = a.split("="); return [key, val.toLowerCase() === 'true'] as [string, boolean]
+                }).forEach(([key, val]) => opts[key] = val)
     
                 bot.autoJumper.setOpts(opts);
                 break;

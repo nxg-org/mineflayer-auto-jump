@@ -14,5 +14,6 @@
         "rootDir": "src/",
         "lib": ["es6", "dom", "es2019"],
     },
-    "compileOnSave": true,
+    "include": ["src/**/*"],
+    "compileOnSave": true
 }

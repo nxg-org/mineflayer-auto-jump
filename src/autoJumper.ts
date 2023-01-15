@@ -1,11 +1,7 @@
 import EventEmitter from "events";
 import type { Bot } from "mineflayer";
 import { BaseSimulator, EntityPhysics, EPhysicsCtx } from "@nxg-org/mineflayer-physics-util";
-import { ControlStateHandler } from "@nxg-org/mineflayer-physics-util/lib/physics/player/playerControls";
-
-function printit({ x, y, z }: { x: number; y: number; z: number }, ...args: any[]) {
-  console.log(`${x} ${y} ${z}`, ...args);
-}
+import { ControlStateHandler } from "@nxg-org/mineflayer-physics-util";
 
 export interface JumpCheckerOpts {
   edgeToLiquidOnly: boolean;
@@ -50,12 +46,10 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
   protected dontJumpSinceCantClear() {
     const ectx = EPhysicsCtx.FROM_ENTITY(this.ctx, this.bot.entity);
     ectx.state.controlState = ControlStateHandler.COPY_BOT(this.bot as any);
-
     ectx.state.controlState.set("jump", true);
 
     const nextTick = this.simulateUntil(
       (state, ticks) => {
-        
         let flag = false;
         if (this.minimizeFallDmg) flag = state.velocity.y < -0.6;
         return flag || (ticks > 1 && state.onGround);
