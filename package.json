@@ -1,6 +1,6 @@
 {
   "name": "@nxg-org/mineflayer-auto-jump",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Auto-jump for mineflayer.",
   "main": "lib/index.js",
   "repository": "https://github.com/nxg-org/mineflayer-auto-jump.git",
