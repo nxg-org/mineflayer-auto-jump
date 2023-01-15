@@ -16,12 +16,14 @@ bot.loadPlugin(pathfinder);
 bot.on("spawn", () => {
   bot.autoJumper.enable();
   bot.autoJumper.setOpts({
-    debug: true,
-    jumpIntoWater: true,
-    jumpOnAllEdges: false,
-    minimizeFallDmg: false,
-    jumpDownDescending: 0
+    debug: true,               // print debug info, slower.
+    enabled: true,             // whether or not to auto jump
+    jumpIntoWater: true,       // jump into water (extra distance)
+    jumpOnAllEdges: false,     // jump off of every edge
+    minimizeFallDmg: false,    // don't jump if induces fall damage
+    maxBlockOffset: 0          // max blocks to allow fall (default 0)
   });
+
 
   bot.on("chat", (username, message) => {
     let [cmd, ...args] = message.split(" ");

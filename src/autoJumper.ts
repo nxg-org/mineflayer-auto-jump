@@ -10,7 +10,7 @@ function tp({ x, y, z }: { x: number; y: number; z: number }, ...args: any[]) {
 export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
   public jumpOnAllEdges: boolean = false;
   public jumpIntoWater: boolean = false;
-  public jumpDownDescending: number = 0;
+  public maxBlockOffset: number = 0;
   public minimizeFallDmg: boolean = false;
   public debug: boolean = false;
 
@@ -164,7 +164,7 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
       30 // end of jump.
     );
 
-    if (jumpState.position.y < this.bot.entity.position.y - this.jumpDownDescending) return false;
+    if (jumpState.position.y < this.bot.entity.position.y - this.maxBlockOffset) return false;
     if (jumpState.isInWater && this.jumpIntoWater) return false; // handled elsewhere.
 
     const maxAge = ectx.state.speed > 1 ? jumpState.age - Math.round(Math.log2((ectx.state.speed - 1) * 3)) : jumpState.age;
@@ -180,7 +180,7 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
       maxAge // end of jump.
     );
 
-    const flag = jumpState.position.y >= this.bot.entity.position.y - this.jumpDownDescending;
+    const flag = jumpState.position.y >= this.bot.entity.position.y - this.maxBlockOffset;
     return flag && runState.position.y < this.bot.entity.position.y;
   }
 
