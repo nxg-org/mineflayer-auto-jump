@@ -1,7 +1,6 @@
 import { createBot } from "mineflayer";
 import { JumpChecker } from "../src/autoJumper";
 import { loader } from "../src/index";
-import { pathfinder, goals } from "mineflayer-pathfinder"
 
 const bot = createBot({
   host: "localhost",
@@ -11,7 +10,6 @@ const bot = createBot({
 });
 
 bot.loadPlugin(loader);
-bot.loadPlugin(pathfinder);
 
 bot.on("spawn", () => {
   bot.autoJumper.enable();
