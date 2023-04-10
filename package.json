@@ -23,7 +23,7 @@
   },
   "devDependencies": {
     "mineflayer": "^4.6.0",
-    "typescript": "^4.9.4"
+    "typescript": "^5.0.4"
   },
   "dependencies": {
     "@nxg-org/mineflayer-physics-util": "^1.3.11",
