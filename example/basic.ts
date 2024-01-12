@@ -4,7 +4,7 @@ import { loader } from "../src/index";
 
 const bot = createBot({
   host: "localhost",
-  port: 25566,
+  port: 25565,
   username: "autoJumper",
   auth: "offline",
 });
@@ -12,10 +12,10 @@ const bot = createBot({
 bot.loadPlugin(loader);
 
 bot.on("spawn", () => {
-  bot.autoJumper.enable();
+  // bot.autoJumper.enable();
   bot.autoJumper.setOpts({
     debug: true,               // print debug info, slower.
-    enabled: true,             // whether or not to auto jump
+    enabled: false,             // whether or not to auto jump
     jumpIntoWater: true,       // jump into water (extra distance)
     jumpOnAllEdges: false,     // jump off of every edge
     minimizeFallDmg: false,    // don't jump if induces fall damage
@@ -64,10 +64,15 @@ function follow() {
   if (bot.entity.position.y > e.position.y) {
     minBlockDrop = (bot.entity.position.y - e.position.y) + 1 // drop 1 block beneath wherever the entity is at right now.
   }
-  bot.autoJumper.setOpts({jumpDownDescending: minBlockDrop})
+  bot.autoJumper.setOpts({maxBlockOffset: minBlockDrop})
   if (e && bot.entity.onGround) {
     bot.lookAt(e.position.offset(0, e.height, 0), true);
-  
+    if (bot.autoJumper.canJump()) {
+      bot.setControlState("jump", true);
+     
+    } else {
+      bot.setControlState("jump", false);
+    }
   }
 
   if (bot.entity.position.distanceTo(e.position) < 3) {
@@ -81,4 +86,6 @@ function follow() {
     bot.setControlState("forward", true);
     bot.setControlState("sprint", true)
   }
+  
+
 }

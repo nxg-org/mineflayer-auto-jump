@@ -56,20 +56,37 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
     return false;
   }
 
+  public canJump() {
+    if (this.debug) {
+      console.log(
+        "bad:",
+        this.dontJumpSinceCantClear(),
+        "good:",
+        this.shouldJumpFromCollision(),
+        this.shouldJumpToAvoidDanger(),
+        !this.jumpOnAllEdges && this.jumpIntoWater ? this.shouldJumpIntoWater() : false,
+        this.shouldJumpSinceNextBlockEmptyAndAvailableBlock(),
+        this.jumpOnAllEdges ? this.shouldJumpSinceBlockEdge() : false
+      );
+      tp(this.bot.entity.position, "pos");
+    }
+    return !this.dontJumpSinceCantClear();
+  }
+
   /**
    * This can be optimized by calculating the max height of player (1.25) and the resulting jump boost.
    * @returns
    */
   protected dontJumpSinceCantClear() {
     const ectx = EPhysicsCtx.FROM_BOT(this.ctx, this.bot);
-    ectx.state.controlState.set("jump", true);
+    ectx.state.control.set("jump", true);
 
     let tooMuchFallDmg = false;
 
     let simState = this.simulateUntil(
       (state, ticks) => {
         if (!tooMuchFallDmg) {
-          tooMuchFallDmg = this.minimizeFallDmg ? state.velocity.y < -0.6 : false;
+          tooMuchFallDmg = this.minimizeFallDmg ? state.vel.y < -0.6 : false;
         }
         return (ticks > 0 && state.isCollidedVertically) || state.isInWater;
       },
@@ -88,7 +105,7 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
       simState = this.simulateUntil(
         (state, ticks) => {
           if (!tooMuchFallDmg) {
-            tooMuchFallDmg = this.minimizeFallDmg ? state.velocity.y < -0.6 : false;
+            tooMuchFallDmg = this.minimizeFallDmg ? state.vel.y < -0.6 : false;
           }
           return (ticks > 0 && (state.onGround || simState.isCollidedHorizontally)) || state.isInWater;
         },
@@ -102,7 +119,7 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
 
     if (this.minimizeFallDmg && tooMuchFallDmg && !simState.isInWater) return true;
 
-    return simState.isCollidedHorizontally && Math.floor(simState.position.y) <= Math.floor(this.bot.entity.position.y);
+    return simState.isCollidedHorizontally && Math.floor(simState.pos.y) <= Math.floor(this.bot.entity.position.y);
   }
 
   /**
@@ -151,7 +168,7 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
 
   protected shouldJumpSinceNextBlockEmptyAndAvailableBlock() {
     const ectx = EPhysicsCtx.FROM_BOT(this.ctx, this.bot);
-    ectx.state.controlState.set("jump", true);
+    ectx.state.control.set("jump", true);
 
     const jumpState = this.simulateUntil(
       (state, ticks) => {
@@ -164,14 +181,14 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
       30 // end of jump.
     );
 
-    if (jumpState.position.y < this.bot.entity.position.y - this.maxBlockOffset) return false;
+    if (jumpState.pos.y < this.bot.entity.position.y - this.maxBlockOffset) return false;
     if (jumpState.isInWater && this.jumpIntoWater) return false; // handled elsewhere.
 
     const maxAge = ectx.state.speed > 1 ? jumpState.age - Math.round(Math.log2((ectx.state.speed - 1) * 3)) : jumpState.age;
     const ectx1 = EPhysicsCtx.FROM_BOT(this.ctx, this.bot);
     const runState = this.simulateUntil(
       (state, ticks) => {
-        return state.position.y < this.bot.entity.position.y;
+        return state.pos.y < this.bot.entity.position.y;
       },
       (state) => {},
       (state, ticks) => {},
@@ -180,8 +197,8 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
       maxAge // end of jump.
     );
 
-    const flag = jumpState.position.y >= this.bot.entity.position.y - this.maxBlockOffset;
-    return flag && runState.position.y < this.bot.entity.position.y;
+    const flag = jumpState.pos.y >= this.bot.entity.position.y - this.maxBlockOffset;
+    return flag && runState.pos.y < this.bot.entity.position.y;
   }
 
   /**
@@ -197,7 +214,7 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
     if (!this.shouldJumpSinceBlockEdge()) return false;
 
     const ectx = EPhysicsCtx.FROM_BOT(this.ctx, this.bot);
-    ectx.state.controlState.set("jump", true);
+    ectx.state.control.set("jump", true);
 
     const nextTick = this.simulateUntil(
       (state, ticks) => {
@@ -216,7 +233,7 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
   protected shouldJumpToAvoidDanger(): boolean {
     const ectx = EPhysicsCtx.FROM_BOT(this.ctx, this.bot);
     this.predictForwardRaw(ectx, this.bot.world, 1);
-    ectx.state.controlState.set("jump", true);
+    ectx.state.control.set("jump", true);
     const finalTick = this.simulateUntil(
       (state, ticks) => {
         return ticks > 0 && state.onGround;

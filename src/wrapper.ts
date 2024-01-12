@@ -38,7 +38,7 @@ export class AutoJumper extends (EventEmitter as { new (): AutoJumperEmitter }) 
    * Set options straight to the class, inducing setters.
    * @param opts Options.
    */
-  public setOpts(opts: Partial<AutoJumperOpts & JumpCheckerOpts>) {
+  public setOpts(opts: Partial<AutoJumperOpts | JumpCheckerOpts>) {
     for (const key in opts) {
       if (key in this && key in DefaultKeys) {
         // @ts-expect-error
@@ -49,6 +49,14 @@ export class AutoJumper extends (EventEmitter as { new (): AutoJumperEmitter }) 
         this.handler[key] = opts[key];
       }
     }
+  }
+
+  public shouldJump() {
+    return this.handler.shouldJump();
+  } 
+
+  public canJump() {
+    return this.handler.canJump();
   }
 
   private jumpListener = async () => {
@@ -65,4 +73,6 @@ export class AutoJumper extends (EventEmitter as { new (): AutoJumperEmitter }) 
       }
     }
   };
+
+
 }
