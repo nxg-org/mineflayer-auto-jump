@@ -59,7 +59,7 @@ export class AutoJumper extends (EventEmitter as { new (): AutoJumperEmitter }) 
     return this.handler.canJump();
   }
 
-  private jumpListener = async () => {
+  private jumpListener = () => {
     if (this.handler.shouldJump()) {
       if (!this.lastJump) {
         this.emit("shouldJump");
