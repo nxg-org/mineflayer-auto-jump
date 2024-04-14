@@ -14,7 +14,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/nxg-org/mineflayer-physics-util.git"
+    "url": "git+https://github.com/nxg-org/mineflayer-auto-jump.git"
   },
   "scripts": {
     "build": "npx tsc",
