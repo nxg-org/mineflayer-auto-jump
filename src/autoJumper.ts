@@ -18,6 +18,22 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
     super(new EntityPhysics(bot.registry));
   }
 
+  public debugInfo() {
+    console.debug(
+      `[AUTOJUMP] DEBUG INFO:\n` +
+        `don't jump since can't clear: ${this.dontJumpSinceCantClear()}\n` +
+        `should jump from collision: ${this.shouldJumpFromCollision()}\n` +
+        `should jump to avoid danger: ${this.shouldJumpToAvoidDanger()}\n` +
+        `should jump into water: (jumpOnAllEdges=${this.jumpOnAllEdges}, jumpIntoWater=${this.jumpIntoWater}) ${
+          !this.jumpOnAllEdges && this.jumpIntoWater ? this.shouldJumpIntoWater() : false
+        }\n` +
+        `should jump since next block empty and available block: ${this.shouldJumpSinceNextBlockEmptyAndAvailableBlock()}\n` +
+        `should jump since block edge (jumpOnAllEdges=${this.jumpOnAllEdges}): ${
+          this.jumpOnAllEdges ? this.shouldJumpSinceBlockEdge() : false
+        }`
+    );
+  }
+
   public shouldJump() {
     if (
       this.bot.getControlState("back") ||
@@ -26,20 +42,8 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
       this.bot.getControlState("right") // && this.bot.entity.onGround
     ) {
       if (this.debug) {
-    
-          console.log(
-            "bad:",
-            this.dontJumpSinceCantClear(),
-            "good:",
-            this.shouldJumpFromCollision(),
-            this.shouldJumpToAvoidDanger(),
-            !this.jumpOnAllEdges && this.jumpIntoWater ? this.shouldJumpIntoWater() : false,
-            this.shouldJumpSinceNextBlockEmptyAndAvailableBlock(),
-            this.jumpOnAllEdges ? this.shouldJumpSinceBlockEdge() : false
-          );
-          tp(this.bot.entity.position, "pos");
-    
-
+        this.debugInfo();
+        tp(this.bot.entity.position, "pos");
       }
       if (this.dontJumpSinceCantClear()) {
         return false;
@@ -58,16 +62,7 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
 
   public canJump() {
     if (this.debug) {
-      console.log(
-        "bad:",
-        this.dontJumpSinceCantClear(),
-        "good:",
-        this.shouldJumpFromCollision(),
-        this.shouldJumpToAvoidDanger(),
-        !this.jumpOnAllEdges && this.jumpIntoWater ? this.shouldJumpIntoWater() : false,
-        this.shouldJumpSinceNextBlockEmptyAndAvailableBlock(),
-        this.jumpOnAllEdges ? this.shouldJumpSinceBlockEdge() : false
-      );
+      this.debugInfo();
       tp(this.bot.entity.position, "pos");
     }
     return !this.dontJumpSinceCantClear();
@@ -148,13 +143,15 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
       (state, ticks) => {
         return state.isCollidedHorizontally;
       },
-      (state) => { flag = true },
+      (state) => {
+        flag = true;
+      },
       (state, ticks) => {},
       ectx,
       this.bot.world,
       maxAge
     );
-    return flag
+    return flag;
   }
 
   /**
@@ -168,7 +165,7 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
 
   /**
    * If we fall, check:
-   * 
+   *
    * - if we fall too far, don't jump.
    * - if we fall into water, don't jump (handled elsewhere)
    * - if we do jump, we'll end up on a good block (higher than if we didn't jump)
@@ -239,7 +236,7 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
 
   /**
    * Jump if we're about to fall into lava.
-   * 
+   *
    * This can be extended for other various dangers. (TODO)
    */
   protected shouldJumpToAvoidDanger(): boolean {
