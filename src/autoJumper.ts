@@ -166,6 +166,13 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
     return this.bot.entity.onGround && !nextTick.onGround;
   }
 
+  /**
+   * If we fall, check:
+   * 
+   * - if we fall too far, don't jump.
+   * - if we fall into water, don't jump (handled elsewhere)
+   * - if we do jump, we'll end up on a good block (higher than if we didn't jump)
+   */
   protected shouldJumpSinceNextBlockEmptyAndAvailableBlock() {
     const ectx = EPhysicsCtx.FROM_BOT(this.ctx, this.bot);
     ectx.state.control.set("jump", true);
@@ -230,6 +237,11 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
     return !(nextTick.isCollidedVertically && !nextTick.isInWater);
   }
 
+  /**
+   * Jump if we're about to fall into lava.
+   * 
+   * This can be extended for other various dangers. (TODO)
+   */
   protected shouldJumpToAvoidDanger(): boolean {
     const ectx = EPhysicsCtx.FROM_BOT(this.ctx, this.bot);
     this.predictForwardRaw(ectx, this.bot.world, 1);
