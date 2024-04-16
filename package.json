@@ -1,6 +1,6 @@
 {
   "name": "@nxg-org/mineflayer-auto-jump",
-  "version": "0.7.4",
+  "version": "0.7.5",
   "description": "Auto-jump for mineflayer.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
