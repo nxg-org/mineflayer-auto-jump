@@ -9,6 +9,7 @@ function tp({ x, y, z }: { x: number; y: number; z: number }, ...args: any[]) {
 
 export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
   public jumpOnAllEdges: boolean = false;
+  public jumpToClearSmallDip: boolean = false;
   public jumpIntoWater: boolean = false;
   public maxBlockOffset: number = 0;
   public minimizeFallDmg: boolean = false;
@@ -27,7 +28,8 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
         `should jump into water: (jumpOnAllEdges=${this.jumpOnAllEdges}, jumpIntoWater=${this.jumpIntoWater}) ${
           !this.jumpOnAllEdges && this.jumpIntoWater ? this.shouldJumpIntoWater() : false
         }\n` +
-        `should jump since next block empty and available block: ${this.shouldJumpSinceNextBlockEmptyAndAvailableBlock()}\n` +
+        `should jump since next block empty and available block (jumpToClearSmallDip=${this.jumpToClearSmallDip}): ${
+            this.jumpToClearSmallDip ? this.shouldJumpSinceNextBlockEmptyAndAvailableBlock() : false}\n` +
         `should jump since block edge (jumpOnAllEdges=${this.jumpOnAllEdges}): ${
           this.jumpOnAllEdges ? this.shouldJumpSinceBlockEdge() : false
         }`
@@ -53,7 +55,7 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
         this.shouldJumpFromCollision() ||
         this.shouldJumpToAvoidDanger() ||
         (!this.jumpOnAllEdges && this.jumpIntoWater ? this.shouldJumpIntoWater() : false) ||
-        this.shouldJumpSinceNextBlockEmptyAndAvailableBlock() ||
+        (this.jumpToClearSmallDip ? this.shouldJumpSinceNextBlockEmptyAndAvailableBlock() : false) ||
         (this.jumpOnAllEdges ? this.shouldJumpSinceBlockEdge() : false)
       );
     }
@@ -174,6 +176,9 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
     const ectx = EPhysicsCtx.FROM_BOT(this.ctx, this.bot);
     ectx.state.control.set("jump", true);
 
+    const startBlock = this.bot.blockAt(this.bot.entity.position);
+    if (!startBlock) return false;
+
     const jumpState = this.simulateUntil(
       (state, ticks) => {
         return (ticks > 0 && state.onGround) || state.isInWater;
@@ -184,6 +189,11 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
       this.bot.world,
       30 // end of jump.
     );
+    
+    const endJump = this.bot.blockAt(jumpState.pos);
+    if (!endJump) return false;
+
+    if (endJump.position.equals(startBlock.position)) return false; // fix for jumping on the same block, but walking takes us into crevice.
 
     if (jumpState.pos.y < this.bot.entity.position.y - this.maxBlockOffset) return false;
     if (jumpState.isInWater && this.jumpIntoWater) return false; // handled elsewhere.
