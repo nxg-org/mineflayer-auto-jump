@@ -8,6 +8,7 @@ function tp({ x, y, z }: { x: number; y: number; z: number }, ...args: any[]) {
 }
 
 export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
+  public strictBlockCollision: boolean = true; // if true, only jump if collision block is ABOVE current walking level.
   public jumpOnAllEdges: boolean = false;
   public jumpToClearSmallDip: boolean = false;
   public jumpIntoWater: boolean = false;
@@ -130,6 +131,10 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
 
     let maxAge = 7;
 
+    const startBlock = this.bot.blockAt(this.bot.entity.position);
+    if (!startBlock) return false;
+
+
     // handles vanilla and up to ~5 for both.
     // it's stupid tho, so feel free to change it.
     if (ectx.state.speed > 1 || ectx.state.jumpBoost > 1) {
@@ -153,8 +158,17 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
       this.bot.world,
       maxAge
     );
+
+    const endBlock = this.bot.blockAt(nextTick.pos);
+    if (!endBlock) return false;
+
+    if (this.strictBlockCollision) {
+      if (endBlock.position.y <= startBlock.position.y) return false;
+    }
+
     return flag;
   }
+  
 
   /**
    * Note: this is purposefully cheap.
