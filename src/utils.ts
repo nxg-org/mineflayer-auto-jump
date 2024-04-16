@@ -23,10 +23,12 @@ export const DefaultHandlerKeys: JumpCheckerOpts = {
 
 export interface AutoJumperOpts {
   enabled: boolean;
+  cancelOnShift: boolean;
 }
 
 export const DefaultKeys: AutoJumperOpts = {
   enabled: false,
+  cancelOnShift: false
 };
 
 interface AutoJumperEvents {

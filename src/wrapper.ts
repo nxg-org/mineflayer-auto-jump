@@ -9,6 +9,8 @@ export class AutoJumper extends (EventEmitter as { new (): AutoJumperEmitter }) 
   private lastJump: boolean = false;
   private _enabled: boolean = false;
 
+  public cancelOnShift: boolean = false;
+
   public get enabled() {
     return this._enabled;
   }
@@ -60,6 +62,12 @@ export class AutoJumper extends (EventEmitter as { new (): AutoJumperEmitter }) 
   }
 
   private jumpListener = () => {
+
+    if (this.cancelOnShift && this.bot.getControlState("sneak")) {
+      this.lastJump = false;
+      return;
+    }
+
     if (this.handler.shouldJump()) {
       if (!this.lastJump) {
         this.emit("shouldJump");

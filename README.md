@@ -50,6 +50,11 @@ Returns if the bot should jump (if we do not jump right now, there will be an is
 
 Returns if the bot is allowed to jump (no jump *needed*, but no detriment to jumping right now).
 
+### `autoJump.strictBlockCollision: boolean`
+
+If true, only jump if the bot is colliding with a block ABOVE current walking level. 
+If false, the bot will jump if it is colliding with a block at all.
+
 ### `autoJump.jumpOnAllEdges: boolean`
 
 If the bot should jump on all edges. This is mainly used for descending slopes, combined with `maxBlockOffset`.
@@ -70,6 +75,10 @@ If the bot should minimize fall damage. Similar to maxBlockOffset set to 3 excep
 
 If the bot should debug the jump checker. Your console will be spammed. Just report the information to me.
 
+### `autoJump.cancelOnShift: boolean`
+
+If the bot should cancel the jump if the player is holding shift. Useful for sneaking.
+
 ## Events
 
 ### `autoJump.on('shouldJump', () => {})`
@@ -80,16 +89,10 @@ Emitted when the bot should jump.
 
 <!-- 
 
-export interface JumpCheckerOpts {
-  jumpOnAllEdges: boolean;
-  jumpIntoWater: boolean;
-  maxBlockOffset: number;
-  minimizeFallDmg: boolean;
-  debug: boolean;
-}
-
 export const DefaultHandlerKeys: JumpCheckerOpts = {
+  strictBlockCollision: true,
   jumpOnAllEdges: false,
+  jumpToClearSmallDip: false,
   jumpIntoWater: false,
   maxBlockOffset: 0,
   minimizeFallDmg: false,
@@ -98,10 +101,21 @@ export const DefaultHandlerKeys: JumpCheckerOpts = {
 
 export interface AutoJumperOpts {
   enabled: boolean;
+  cancelOnShift: boolean;
 }
 
 export const DefaultKeys: AutoJumperOpts = {
   enabled: false,
+  cancelOnShift: false
+};
+
+
+export const DefaultHandlerKeys: JumpCheckerOpts = {
+  jumpOnAllEdges: false,
+  jumpIntoWater: false,
+  maxBlockOffset: 0,
+  minimizeFallDmg: false,
+  debug: false
 };
 
 interface AutoJumperEvents {
