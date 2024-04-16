@@ -162,10 +162,9 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
     const endBlock = this.bot.blockAt(nextTick.pos);
     if (!endBlock) return false;
 
-    if (this.strictBlockCollision) {
-      if (endBlock.position.y <= startBlock.position.y) return false;
-    }
+    if (!this.strictBlockCollision) return flag;
 
+    if (endBlock.position.y < startBlock.position.y) return false;
     return flag;
   }
   
