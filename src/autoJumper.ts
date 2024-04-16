@@ -2,6 +2,7 @@ import { BaseSimulator, EntityPhysics, EPhysicsCtx } from "@nxg-org/mineflayer-p
 import type { Bot } from "mineflayer";
 
 import { JumpCheckerOpts } from "./utils";
+import { Vec3 } from "vec3";
 
 function tp({ x, y, z }: { x: number; y: number; z: number }, ...args: any[]) {
   console.log(`${x} ${y} ${z}`, ...args);
@@ -30,7 +31,8 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
           !this.jumpOnAllEdges && this.jumpIntoWater ? this.shouldJumpIntoWater() : false
         }\n` +
         `should jump since next block empty and available block (jumpToClearSmallDip=${this.jumpToClearSmallDip}): ${
-            this.jumpToClearSmallDip ? this.shouldJumpSinceNextBlockEmptyAndAvailableBlock() : false}\n` +
+          this.jumpToClearSmallDip ? this.shouldJumpSinceNextBlockEmptyAndAvailableBlock() : false
+        }\n` +
         `should jump since block edge (jumpOnAllEdges=${this.jumpOnAllEdges}): ${
           this.jumpOnAllEdges ? this.shouldJumpSinceBlockEdge() : false
         }`
@@ -73,7 +75,7 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
 
   /**
    * This can be optimized by calculating the max height of player (1.25) and the resulting jump boost.
-   * @returns
+   * @returns true = don't jump
    */
   protected dontJumpSinceCantClear() {
     const ectx = EPhysicsCtx.FROM_BOT(this.ctx, this.bot);
@@ -81,12 +83,16 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
 
     let tooMuchFallDmg = false;
 
-    let simState = this.simulateUntil(
+    const startFlooredPos = this.bot.entity.position.floored();
+
+    let collided: Vec3 | undefined ;
+    let state = this.simulateUntil(
       (state, ticks) => {
-        if (!tooMuchFallDmg) {
-          tooMuchFallDmg = this.minimizeFallDmg ? state.vel.y < -0.6 : false;
+        if (!tooMuchFallDmg) tooMuchFallDmg = this.minimizeFallDmg ? state.vel.y < -0.6 : false;
+        if (collided == null) {
+          if (state.isCollidedHorizontally) collided = state.pos.clone();
         }
-        return (ticks > 0 && state.isCollidedVertically) || state.isInWater;
+        return (ticks > 0 && state.isCollidedVertically) || state.isInWater
       },
       (state) => {},
       (state, ticks) => {},
@@ -95,17 +101,35 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
       999 // unneeded since we'll always be reaching our goal relatively easily.
     );
 
-    if (simState.isInLava) return true;
+    if (state.isInLava) return true;
+
+    if (collided != null) {
+      if (collided.distanceTo(this.bot.entity.position) > Math.SQRT2) return true; // no point in jumping right now.
+
+      // TODO: better check
+      if (state.pos.y >= startFlooredPos.y + 1 && state.onGround) return false;
+      if (state.pos.y < this.bot.entity.position.y) return true;
+
+      const travelDir = state.pos.minus(this.bot.entity.position);
+      const lookDir = this.bot.util.getViewDir();
+
+      const dot = travelDir.dot(lookDir);
+      if (dot < 0.5) {
+        return true;
+      }
+    
+    }
+
 
     // if we collide with a block above us, we still don't know if we will make it or not.
     // So continue simulating.
-    if (simState.isCollidedVertically && !simState.onGround) {
-      simState = this.simulateUntil(
+    if (state.isCollidedVertically && !state.onGround) {
+      state = this.simulateUntil(
         (state, ticks) => {
           if (!tooMuchFallDmg) {
             tooMuchFallDmg = this.minimizeFallDmg ? state.vel.y < -0.6 : false;
           }
-          return (ticks > 0 && (state.onGround || simState.isCollidedHorizontally)) || state.isInWater;
+          return (ticks > 0 && (state.onGround || state.isCollidedHorizontally)) || state.isInWater;
         },
         (state) => {},
         (state, ticks) => {},
@@ -115,9 +139,9 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
       );
     }
 
-    if (this.minimizeFallDmg && tooMuchFallDmg && !simState.isInWater) return true;
+    if (this.minimizeFallDmg && tooMuchFallDmg && !state.isInWater) return true;
 
-    return simState.isCollidedHorizontally && Math.floor(simState.pos.y) <= Math.floor(this.bot.entity.position.y);
+    return state.isCollidedHorizontally && Math.floor(state.pos.y) <= Math.floor(this.bot.entity.position.y);
   }
 
   /**
@@ -133,7 +157,6 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
 
     const startBlock = this.bot.blockAt(this.bot.entity.position);
     if (!startBlock) return false;
-
 
     // handles vanilla and up to ~5 for both.
     // it's stupid tho, so feel free to change it.
@@ -167,7 +190,6 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
     if (endBlock.position.y < startBlock.position.y) return false;
     return flag;
   }
-  
 
   /**
    * Note: this is purposefully cheap.
@@ -202,7 +224,7 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
       this.bot.world,
       30 // end of jump.
     );
-    
+
     const endJump = this.bot.blockAt(jumpState.pos);
     if (!endJump) return false;
 

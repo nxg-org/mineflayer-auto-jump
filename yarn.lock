@@ -282,20 +282,25 @@ macaddress@^0.5.1:
   resolved "https://registry.yarnpkg.com/macaddress/-/macaddress-0.5.3.tgz#2b9d6832be934cb775749f30f57d6537184a2bda"
   integrity sha512-vGBKTA+jwM4KgjGZ+S/8/Mkj9rWzePyGY6jManXPGhiWu63RYwW8dKPyk5koP+8qNVhPhHgFa1y/MJ4wrjsNrg==
 
-minecraft-data@^3.0.0, minecraft-data@^3.38.0, minecraft-data@^3.44.0, minecraft-data@^3.53.0:
+minecraft-data@^3.0.0, minecraft-data@^3.38.0:
   version "3.59.2"
   resolved "https://registry.yarnpkg.com/minecraft-data/-/minecraft-data-3.59.2.tgz#457fd8a3d3e16feec651290ed95b2aced4bbf7bf"
   integrity sha512-ra2xsZ1d0UvcxF77ZtpPqKUchU8pjlhPsh/cX/IW7H3yQSA4j7vPSl2ztD+bzfszAmS6qeHjQK/LifUHmlmK/Q==
+
+minecraft-data@^3.55.0, minecraft-data@^3.56.0:
+  version "3.64.1"
+  resolved "https://registry.yarnpkg.com/minecraft-data/-/minecraft-data-3.64.1.tgz#4e53c3da374580c62f4a63307f1ce9ba4f1ef9df"
+  integrity sha512-HFu3lYj2Y6kMQyyS0H4b1yIFTD86dgSABTRtTSX+8uUdHS+NuUjuOdfQU1QH1jHK4p0G5MA1+Okjuy6zh2VTPg==
 
 minecraft-folder-path@^1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/minecraft-folder-path/-/minecraft-folder-path-1.2.0.tgz#08ea450bfb20dbb02cf6e1470864e2f0d652e477"
   integrity sha512-qaUSbKWoOsH9brn0JQuBhxNAzTDMwrOXorwuRxdJKKKDYvZhtml+6GVCUrY5HRiEsieBEjCUnhVpDuQiKsiFaw==
 
-minecraft-protocol@^1.44.0:
-  version "1.45.0"
-  resolved "https://registry.yarnpkg.com/minecraft-protocol/-/minecraft-protocol-1.45.0.tgz#5fe5e65b7a6cde595766c165a6932a55cc475dfd"
-  integrity sha512-vnw78FShBljUziQY8dNElJHJvQIscEPa97wEOiykOodUJKQiBDWB3ZETAd0CYzEFapS7SAlEiNuqFgJdG9o5aQ==
+minecraft-protocol@^1.47.0:
+  version "1.47.0"
+  resolved "https://registry.yarnpkg.com/minecraft-protocol/-/minecraft-protocol-1.47.0.tgz#0c6e82818d06178174b9047b9cb81ae7c4c33432"
+  integrity sha512-IHL8faXLLIWv1O+2v2NgyKlooilu/OiSL9orI8Kqed/rZvVOrFPzs2PwMAYjpQX9gxLPhiSU19KqZ8CjfNuqhg==
   dependencies:
     "@types/readable-stream" "^4.0.0"
     aes-js "^3.1.2"
@@ -304,11 +309,12 @@ minecraft-protocol@^1.44.0:
     endian-toggle "^0.0.0"
     lodash.get "^4.1.2"
     lodash.merge "^4.3.0"
-    minecraft-data "^3.53.0"
+    minecraft-data "^3.55.0"
     minecraft-folder-path "^1.2.0"
     node-fetch "^2.6.1"
     node-rsa "^0.4.2"
     prismarine-auth "^2.2.0"
+    prismarine-chat "^1.10.0"
     prismarine-nbt "^2.5.0"
     prismarine-realms "^1.2.0"
     protodef "^1.8.0"
@@ -316,13 +322,13 @@ minecraft-protocol@^1.44.0:
     uuid-1345 "^1.0.1"
     yggdrasil "^1.4.0"
 
-mineflayer@^4.6.0:
-  version "4.17.0"
-  resolved "https://registry.yarnpkg.com/mineflayer/-/mineflayer-4.17.0.tgz#df116fee12908e47fb4d08896532152188aaa39e"
-  integrity sha512-Bu5vwv3rhVjyMV8jtR/i+2SmJHXPdfUAIHQ2JBCwY/w+dpjsIu+gW97l+zBz365HraRO0i+kKb3xxSluAHp7hQ==
+mineflayer@^4.18.0:
+  version "4.20.1"
+  resolved "https://registry.yarnpkg.com/mineflayer/-/mineflayer-4.20.1.tgz#0858091bd8f35e262b3f6a63ab5e666340aa7f52"
+  integrity sha512-QMMNPx4IyZE7ydAzjvGLQLCnQNUOfkk1qVZKxTTS9q3qPTAewz4GhsVUBtbQ8LSbHthe5RcQ1Sgxs4wlIma/Qw==
   dependencies:
-    minecraft-data "^3.44.0"
-    minecraft-protocol "^1.44.0"
+    minecraft-data "^3.56.0"
+    minecraft-protocol "^1.47.0"
     prismarine-biome "^1.1.1"
     prismarine-block "^1.17.0"
     prismarine-chat "^1.7.1"
@@ -333,7 +339,7 @@ mineflayer@^4.6.0:
     prismarine-physics "^1.8.0"
     prismarine-recipe "^1.3.0"
     prismarine-registry "^1.5.0"
-    prismarine-windows "^2.8.0"
+    prismarine-windows "^2.9.0"
     prismarine-world "^3.6.0"
     protodef "^1.14.0"
     typed-emitter "^1.0.0"
@@ -415,6 +421,15 @@ prismarine-block@^1.14.1, prismarine-block@^1.17.0:
     prismarine-nbt "^2.0.0"
     prismarine-registry "^1.1.0"
 
+prismarine-chat@^1.10.0:
+  version "1.10.0"
+  resolved "https://registry.yarnpkg.com/prismarine-chat/-/prismarine-chat-1.10.0.tgz#27d658becee7abd67d6a5fbf1e0c150b9e052d90"
+  integrity sha512-f9ESzi2Kkf4GJadtgBl+SmvtAlmOXaso6Fxt4M/vUXDKgQNSk66APmIHnBkKWyjzG9X2VXsbDGeIIPf/d3guxA==
+  dependencies:
+    mojangson "^2.0.1"
+    prismarine-nbt "^2.0.0"
+    prismarine-registry "^1.4.0"
+
 prismarine-chat@^1.4.1, prismarine-chat@^1.5.0, prismarine-chat@^1.7.1:
   version "1.9.1"
   resolved "https://registry.yarnpkg.com/prismarine-chat/-/prismarine-chat-1.9.1.tgz#2419fabf35feaf637238c148feb972c03e793277"
@@ -494,10 +509,10 @@ prismarine-registry@^1.1.0, prismarine-registry@^1.4.0, prismarine-registry@^1.5
     minecraft-data "^3.0.0"
     prismarine-nbt "^2.0.0"
 
-prismarine-windows@^2.8.0:
-  version "2.8.0"
-  resolved "https://registry.yarnpkg.com/prismarine-windows/-/prismarine-windows-2.8.0.tgz#a22c963b67125a011392b870ef1167206a635631"
-  integrity sha512-9HVhJ8tfCeRubYwQzgz8oiHNAebMJ5hDdjm45PZwrOgewaislnR2HDsbPMWiCcyWkYL7J8bVLVoSzEzv5pH98g==
+prismarine-windows@^2.9.0:
+  version "2.9.0"
+  resolved "https://registry.yarnpkg.com/prismarine-windows/-/prismarine-windows-2.9.0.tgz#574c9ed995b15381a13303dc52906e254910890f"
+  integrity sha512-fm4kOLjGFPov7TEJRmXHoiPabxIQrG36r2mDjlNxfkcLfMHFb3/1ML6mp4iRQa7wL0GK4DIAyiBqCWoeWDxARg==
   dependencies:
     prismarine-item "^1.12.2"
     prismarine-registry "^1.7.0"

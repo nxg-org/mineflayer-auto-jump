@@ -4,27 +4,39 @@ const {loader} = require("../dist/index");
 
 
 const bot = (createBot)({
-    host: "localhost",
-    port: 25566,
-    username: "autoJumper",
+    host: "node2.meowbot.de",
+    port: 5000,
+    username: "test",
     auth: "offline"
 });
 bot.loadPlugin(loader);
 
 
-bot.on("spawn", () => {
+bot.once("spawn", async () => {
     bot.autoJumper.enable();
     bot.autoJumper.setOpts({debug: true})
 
 
     bot.on("chat", (username, message) => {
+        if (username === bot.username) return;
+        let author = bot.players[username];
+      
         let [cmd, ...args] = message.split(' ');
         switch (cmd) {
+
+            case "lookme":
+                if (!author || !author.entity) return;
+                bot.lookAt(author.entity.position.offset(0, author.entity.height, 0));
+                break;
+
+
             case "start":
                 bot.setControlState("forward", true);
                 bot.setControlState("sprint", true);
                 break;
             case "stop":
+            case "cancel":
+            case "end":
                 bot.setControlState("forward", false);
                 bot.setControlState("sprint", false);
                 break;
@@ -39,4 +51,9 @@ bot.on("spawn", () => {
                 break;
         }
     });
+
+
+   await bot.waitForChunksToLoad()
+
+   bot.chat('rocky1928')
 });
