@@ -250,23 +250,27 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
     if (!endBlock) return false;
 
     if (!this.strictBlockCollision) return flag;
-
+    
     if (endBlock.position.y < startBlock.position.y) return false;
-    return flag && this.shouldJumpSinceCollidedAndNeedToClear(ectx, this.bot.entity.position, ectx.state.speed, ectx.state.jumpBoost);
+
+    return flag && this.shouldJumpSinceCollidedAndNeedToClear(this.bot.entity.position, ectx.state.speed, ectx.state.jumpBoost)
   }
 
-  protected shouldJumpSinceCollidedAndNeedToClear(state: EPhysicsCtx, orgPos: Vec3, speed: number, jump: number) {
-    state.state.control.set("jump", true);
+  protected shouldJumpSinceCollidedAndNeedToClear(orgPos: Vec3, speed: number, jump: number) {
+    const ectx = EPhysicsCtx.FROM_BOT(this.ctx, this.bot);
+    ectx.state.control.set("jump", true);
     const nextState= this.simulateUntil(
       (state, ticks) => {
         return ticks > 0 && state.onGround;
       },
       (state) => {},
       (state, ticks) => {},
-      state,
+      ectx,
       this.bot.world,
       999
     );
+
+    console.log(nextState.age, nextState.pos, orgPos, nextState.pos.y > orgPos.y, nextState.control)
 
     return nextState.pos.y > orgPos.y;
 
