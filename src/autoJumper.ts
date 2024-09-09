@@ -172,6 +172,10 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
 
     // if we have a horizontal collision, check to see if it is two-blocks high.
     // if so, we cannot jump.
+
+
+    
+
     if (collided != null) {
       const blocks = this.findAllTouchingBlocks(collided);
       const startYFloor = Math.floor(this.bot.entity.position.y);
@@ -205,7 +209,7 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
 
     if (this.minimizeFallDmg && tooMuchFallDmg && !state.isInWater) return true;
 
-    return state.isCollidedHorizontally && Math.floor(state.pos.y) >= Math.floor(this.bot.entity.position.y);
+    return state.isCollidedHorizontally && Math.floor(state.pos.y) <= Math.floor(this.bot.entity.position.y);
   }
 
   /**
