@@ -250,7 +250,7 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
     if (!endBlock) return false;
 
     if (!this.strictBlockCollision) return flag;
-    
+
     if (endBlock.position.y < startBlock.position.y) return false;
 
     return flag && this.shouldJumpSinceCollidedAndNeedToClear(this.bot.entity.position, ectx.state.speed, ectx.state.jumpBoost)
@@ -269,8 +269,6 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
       this.bot.world,
       999
     );
-
-    console.log(nextState.age, nextState.pos, orgPos, nextState.pos.y > orgPos.y, nextState.control)
 
     return nextState.pos.y > orgPos.y;
 
