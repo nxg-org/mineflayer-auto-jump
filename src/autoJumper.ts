@@ -1,5 +1,7 @@
 import { BaseSimulator, EntityPhysics, EPhysicsCtx } from "@nxg-org/mineflayer-physics-util";
+import { AABB, AABBUtils } from "@nxg-org/mineflayer-util-plugin";
 import type { Bot } from "mineflayer";
+import type {Block} from "prismarine-block";
 
 import { JumpCheckerOpts } from "./utils";
 import { Vec3 } from "vec3";
@@ -50,7 +52,7 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
         this.debugInfo();
         tp(this.bot.entity.position, "pos");
       }
-      if (this.dontJumpSinceCantClear()) {
+      if (this.dontJumpSinceCantClear() || this.dontJumpSinceFasterToWalk()) {
         return false;
       }
 
@@ -70,7 +72,70 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
       this.debugInfo();
       tp(this.bot.entity.position, "pos");
     }
-    return !this.dontJumpSinceCantClear();
+    return !this.dontJumpSinceCantClear() && !this.dontJumpSinceFasterToWalk();
+  }
+
+  protected findWantedXZDirection() {
+    const strafe =
+      ((this.bot.getControlState("left") as unknown as number) - (this.bot.getControlState("right") as unknown as number)) * 0.98;
+    const forward =
+      ((this.bot.getControlState("forward") as unknown as number) - (this.bot.getControlState("back") as unknown as number)) * 0.98;
+
+    const yaw = Math.PI - this.bot.entity.yaw;
+    const sin = Math.sin(yaw);
+    const cos = Math.cos(yaw);
+
+    const vel = this.bot.entity.velocity.clone();
+    vel.x += strafe * cos - forward * sin;
+    vel.z += forward * cos + strafe * sin;
+    vel.y -= vel.y // only XZ
+    return vel;
+  }
+
+  protected findAllTouchingBlocks(pos: Vec3) {
+    const bb = AABBUtils.getPlayerAABB({ position: pos, width: 0.6 }).expand(0.01, -0.01, 0.01);
+    const blocks = [];
+    const seen = new Set();
+    for (let x = bb.minX; x <= bb.maxX; x+=0.3) {
+      for (let y = bb.minY; y <= bb.maxY; y+=0.3) {
+        for (let z = bb.minZ; z <= bb.maxZ; z+=0.3) {
+          const pos = new Vec3(x, y, z).floor();
+          if (seen.has(pos.toString())) continue;
+          seen.add(pos.toString());
+          const block = this.bot.blockAt(pos);
+          if (!block || block.boundingBox == "empty") continue;
+          // check for intersection.
+          const blBBs = block.shapes.map((val) => AABB.fromBlock(block.position));
+          for (const blBB of blBBs) {
+            if (blBB.intersects(bb)) {
+              blocks.push(block);
+              break;
+            }
+          }
+        }
+      }
+    }
+    return blocks;
+  }
+
+  protected getIntersectionPoints(pos: Vec3, blocks: Block[]) {
+    const stateBB = AABBUtils.getPlayerAABB({ position: pos, width: 0.6 }).expand(0.01, -0.01, 0.01);
+    const intersections = [];
+    for (const block of blocks) {
+      if (!block || block.boundingBox == "empty") continue;
+      const blBBs = block.shapes.map((val) => AABB.fromBlock(block.position));
+      for (const blBB of blBBs) {
+        const intersection = blBB.intersect(stateBB);
+        if (intersection) {
+          intersections.push(intersection);
+        }
+      }
+    }
+    return intersections;
+  }
+
+  protected dontJumpSinceFasterToWalk() {
+    return false;
   }
 
   /**
@@ -83,16 +148,18 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
 
     let tooMuchFallDmg = false;
 
-    const startFlooredPos = this.bot.entity.position.floored();
-
-    let collided: Vec3 | undefined ;
+    let collided: Vec3 | undefined;
+    let collidedOnGround = false;
     let state = this.simulateUntil(
       (state, ticks) => {
         if (!tooMuchFallDmg) tooMuchFallDmg = this.minimizeFallDmg ? state.vel.y < -0.6 : false;
-        if (collided == null) {
-          if (state.isCollidedHorizontally) collided = state.pos.clone();
+        if (collided == null || state.vel.y > 0) {
+          if (state.isCollidedHorizontally) {
+            collided = state.pos.clone();
+            collidedOnGround = state.onGround;
+          }
         }
-        return (ticks > 0 && state.isCollidedVertically) || state.isInWater
+        return (ticks > 0 && state.isCollidedVertically) || state.isInWater;
       },
       (state) => {},
       (state, ticks) => {},
@@ -103,23 +170,20 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
 
     if (state.isInLava) return true;
 
+    // if we have a horizontal collision, check to see if it is two-blocks high.
+    // if so, we cannot jump.
     if (collided != null) {
+      const blocks = this.findAllTouchingBlocks(collided);
+      const startYFloor = Math.floor(this.bot.entity.position.y);
       if (collided.distanceTo(this.bot.entity.position) > Math.SQRT2) return true; // no point in jumping right now.
 
-      // TODO: better check
-      if (state.pos.y >= startFlooredPos.y + 1 && state.onGround) return false;
-      if (state.pos.y < this.bot.entity.position.y) return true;
-
-      const travelDir = state.pos.minus(this.bot.entity.position);
-      const lookDir = this.bot.util.getViewDir();
-
-      const dot = travelDir.dot(lookDir);
-      if (dot < 0.5) {
-        return true;
+      const twoHigh = blocks.filter((val) => val.position.y >= startYFloor + 1);
+  
+      // if there are high blocks, we cannot jump if the player landed on the same y level.
+      if (twoHigh.length > 0) {
+        if (state.pos.y < startYFloor + 1) return true;
       }
-    
     }
-
 
     // if we collide with a block above us, we still don't know if we will make it or not.
     // So continue simulating.
@@ -141,7 +205,7 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
 
     if (this.minimizeFallDmg && tooMuchFallDmg && !state.isInWater) return true;
 
-    return state.isCollidedHorizontally && Math.floor(state.pos.y) <= Math.floor(this.bot.entity.position.y);
+    return state.isCollidedHorizontally && Math.floor(state.pos.y) >= Math.floor(this.bot.entity.position.y);
   }
 
   /**
@@ -188,7 +252,27 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
     if (!this.strictBlockCollision) return flag;
 
     if (endBlock.position.y < startBlock.position.y) return false;
-    return flag;
+    return flag && this.shouldJumpSinceCollidedAndNeedToClear(ectx, this.bot.entity.position, ectx.state.speed, ectx.state.jumpBoost);
+  }
+
+  protected shouldJumpSinceCollidedAndNeedToClear(state: EPhysicsCtx, orgPos: Vec3, speed: number, jump: number) {
+    state.state.control.set("jump", true);
+    const nextState= this.simulateUntil(
+      (state, ticks) => {
+        return ticks > 0 && state.onGround;
+      },
+      (state) => {},
+      (state, ticks) => {},
+      state,
+      this.bot.world,
+      999
+    );
+
+    return nextState.pos.y > orgPos.y;
+
+
+
+
   }
 
   /**
@@ -232,9 +316,15 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
 
     if (jumpState.pos.y < this.bot.entity.position.y - this.maxBlockOffset) return false;
     if (jumpState.isInWater && this.jumpIntoWater) return false; // handled elsewhere.
-
-    const maxAge = ectx.state.speed > 1 ? jumpState.age - Math.round(Math.log2((ectx.state.speed - 1) * 3)) : jumpState.age;
+    
+    const sprinting = this.bot.getControlState("sprint");
+    let maxAge = ectx.state.speed > 1 ? jumpState.age - Math.round(Math.log2((ectx.state.speed - 1) * 3)) : jumpState.age;
+    if (!sprinting) {
+      maxAge /= 2;
+    }
     const ectx1 = EPhysicsCtx.FROM_BOT(this.ctx, this.bot);
+    ectx1.state.control.set("jump", false);
+
     const runState = this.simulateUntil(
       (state, ticks) => {
         return state.pos.y < this.bot.entity.position.y;
