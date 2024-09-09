@@ -16,6 +16,7 @@ export class AutoJumper extends (EventEmitter as { new (): AutoJumperEmitter }) 
   }
 
   public set enabled(enable: boolean) {
+    if (enable === this._enabled) return;
     if (enable)   this.bot.on("physicsTick", this.jumpListener);
     else          this.bot.off("physicsTick", this.jumpListener);
 
