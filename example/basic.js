@@ -4,10 +4,11 @@ const {loader} = require("../dist/index");
 
 
 const bot = (createBot)({
-    host: "node2.meowbot.de",
-    port: 5000,
+    host: "localhost",
+    port: 25565,
     username: "test",
-    auth: "offline"
+    version: "1.21.4",
+    auth: "microsoft"
 });
 bot.loadPlugin(loader);
 
