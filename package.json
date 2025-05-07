@@ -1,6 +1,6 @@
 {
   "name": "@nxg-org/mineflayer-auto-jump",
-  "version": "0.7.13",
+  "version": "0.7.15",
   "description": "Auto-jump for mineflayer.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -18,6 +18,7 @@
   },
   "scripts": {
     "build": "npx tsc",
+    "prepublish": "npm run build",
     "test": "ts-node -T example/basic.ts",
     "testraw": "node example/basic.js"
   },
