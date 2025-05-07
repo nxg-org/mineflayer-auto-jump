@@ -7,7 +7,6 @@ import { AutoJumper } from "./wrapper"
 declare module "mineflayer" {
 
     interface Bot {
-        registry: IndexedData
         autoJumper: AutoJumper
         
     }
