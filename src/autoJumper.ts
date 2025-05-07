@@ -1,7 +1,7 @@
 import { BaseSimulator, EntityPhysics, EPhysicsCtx } from "@nxg-org/mineflayer-physics-util";
 import { AABB, AABBUtils } from "@nxg-org/mineflayer-util-plugin";
 import type { Bot } from "mineflayer";
-import type {Block} from "prismarine-block";
+import type { Block } from "prismarine-block";
 
 import { JumpCheckerOpts } from "./utils";
 import { Vec3 } from "vec3";
@@ -88,7 +88,7 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
     const vel = this.bot.entity.velocity.clone();
     vel.x += strafe * cos - forward * sin;
     vel.z += forward * cos + strafe * sin;
-    vel.y -= vel.y // only XZ
+    vel.y -= vel.y; // only XZ
     return vel;
   }
 
@@ -96,9 +96,9 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
     const bb = AABBUtils.getPlayerAABB({ position: pos, width: 0.6 }).expand(0.01, -0.01, 0.01);
     const blocks = [];
     const seen = new Set();
-    for (let x = bb.minX; x <= bb.maxX; x+=0.3) {
-      for (let y = bb.minY; y <= bb.maxY; y+=0.3) {
-        for (let z = bb.minZ; z <= bb.maxZ; z+=0.3) {
+    for (let x = bb.minX; x <= bb.maxX; x += 0.3) {
+      for (let y = bb.minY; y <= bb.maxY; y += 0.3) {
+        for (let z = bb.minZ; z <= bb.maxZ; z += 0.3) {
           const pos = new Vec3(x, y, z).floor();
           if (seen.has(pos.toString())) continue;
           seen.add(pos.toString());
@@ -149,14 +149,12 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
     let tooMuchFallDmg = false;
 
     let collided: Vec3 | undefined;
-    let collidedOnGround = false;
     let state = this.simulateUntil(
       (state, ticks) => {
         if (!tooMuchFallDmg) tooMuchFallDmg = this.minimizeFallDmg ? state.vel.y < -0.6 : false;
         if (collided == null || state.vel.y > 0) {
           if (state.isCollidedHorizontally) {
             collided = state.pos.clone();
-            collidedOnGround = state.onGround;
           }
         }
         return (ticks > 0 && state.isCollidedVertically) || state.isInWater;
@@ -173,16 +171,13 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
     // if we have a horizontal collision, check to see if it is two-blocks high.
     // if so, we cannot jump.
 
-
-    
-
     if (collided != null) {
       const blocks = this.findAllTouchingBlocks(collided);
       const startYFloor = Math.floor(this.bot.entity.position.y);
       if (collided.distanceTo(this.bot.entity.position) > Math.SQRT2) return true; // no point in jumping right now.
 
       const twoHigh = blocks.filter((val) => val.position.y >= startYFloor + 1);
-  
+
       // if there are high blocks, we cannot jump if the player landed on the same y level.
       if (twoHigh.length > 0) {
         if (state.pos.y < startYFloor + 1) return true;
@@ -257,13 +252,13 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
 
     if (endBlock.position.y < startBlock.position.y) return false;
 
-    return flag && this.shouldJumpSinceCollidedAndNeedToClear(this.bot.entity.position, ectx.state.speed, ectx.state.jumpBoost)
+    return flag && this.shouldJumpSinceCollidedAndNeedToClear(this.bot.entity.position, ectx.state.speed, ectx.state.jumpBoost);
   }
 
   protected shouldJumpSinceCollidedAndNeedToClear(orgPos: Vec3, speed: number, jump: number) {
     const ectx = EPhysicsCtx.FROM_BOT(this.ctx, this.bot);
     ectx.state.control.set("jump", true);
-    const nextState= this.simulateUntil(
+    const nextState = this.simulateUntil(
       (state, ticks) => {
         return ticks > 0 && state.onGround;
       },
@@ -275,10 +270,6 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
     );
 
     return nextState.pos.y > orgPos.y;
-
-
-
-
   }
 
   /**
@@ -322,7 +313,7 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
 
     if (jumpState.pos.y < this.bot.entity.position.y - this.maxBlockOffset) return false;
     if (jumpState.isInWater && this.jumpIntoWater) return false; // handled elsewhere.
-    
+
     const sprinting = this.bot.getControlState("sprint");
     let maxAge = ectx.state.speed > 1 ? jumpState.age - Math.round(Math.log2((ectx.state.speed - 1) * 3)) : jumpState.age;
     if (!sprinting) {
