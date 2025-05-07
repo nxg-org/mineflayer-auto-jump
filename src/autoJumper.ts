@@ -1,4 +1,4 @@
-import { BaseSimulator, EntityPhysics, EPhysicsCtx } from "@nxg-org/mineflayer-physics-util";
+import { BaseSimulator, BotcraftPhysics, EntityPhysics, EPhysicsCtx } from "@nxg-org/mineflayer-physics-util";
 import { AABB, AABBUtils } from "@nxg-org/mineflayer-util-plugin";
 import type { Bot } from "mineflayer";
 import type { Block } from "prismarine-block";
@@ -20,7 +20,7 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
   public debug: boolean = false;
 
   public constructor(private bot: Bot) {
-    super(new EntityPhysics(bot.registry));
+    super(new BotcraftPhysics(bot.registry));
   }
 
   public debugInfo() {
