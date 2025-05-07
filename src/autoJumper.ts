@@ -92,7 +92,7 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
     return vel;
   }
 
-  protected findAllTouchingBlocks(pos: Vec3) {
+  protected findAllTouchingBlocks(pos: Vec3): Block[] {
     const bb = AABBUtils.getPlayerAABB({ position: pos, width: 0.6 }).expand(0.01, -0.01, 0.01);
     const blocks = [];
     const seen = new Set();
