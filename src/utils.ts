@@ -33,6 +33,7 @@ export const DefaultKeys: AutoJumperOpts = {
 
 interface AutoJumperEvents {
   shouldJump: () => void;
+  stopJump: () => void;
 }
 
 export type AutoJumperEmitter = StrictEventEmitter<EventEmitter, AutoJumperEvents>;

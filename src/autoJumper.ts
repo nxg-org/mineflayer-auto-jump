@@ -37,7 +37,8 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
         }\n` +
         `should jump since block edge (jumpOnAllEdges=${this.jumpOnAllEdges}): ${
           this.jumpOnAllEdges ? this.shouldJumpSinceBlockEdge() : false
-        }`
+        }\n` +
+        `jumping: ${this.bot.getControlState("jump")}\n`
     );
   }
 

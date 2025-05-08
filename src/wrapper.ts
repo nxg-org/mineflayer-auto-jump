@@ -8,11 +8,17 @@ export class AutoJumper extends (EventEmitter as { new (): AutoJumperEmitter }) 
   private handler: JumpChecker;
   private lastJump: boolean = false;
   private _enabled: boolean = false;
+  private _autoReset: boolean = false;
+
 
   public cancelOnShift: boolean = false;
 
   public get enabled() {
     return this._enabled;
+  }
+
+  public get autoReset() {
+    return this._autoReset;
   }
 
   public set enabled(enable: boolean) {
@@ -70,18 +76,17 @@ export class AutoJumper extends (EventEmitter as { new (): AutoJumperEmitter }) 
     }
 
     if (this.handler.shouldJump()) {
+      // first jump tick for this type
       if (!this.lastJump) {
         this.emit("shouldJump");
         this.lastJump = true;
       }
       this.bot.setControlState("jump", true);
-      this.bot.setControlState("jump", false);
     } else {
       if (this.lastJump) {
         this.lastJump = false;
+        this.bot.setControlState("jump", false);
       }
     }
-  };
-
-
+  }
 }

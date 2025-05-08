@@ -16,7 +16,7 @@
     jsonwebtoken "^9.0.0"
     uuid "^8.3.0"
 
-"@nxg-org/mineflayer-physics-util@^1.8.7":
+"@nxg-org/mineflayer-physics-util@^1.8.6", "@nxg-org/mineflayer-physics-util@^1.8.7":
   version "1.8.7"
   resolved "https://registry.yarnpkg.com/@nxg-org/mineflayer-physics-util/-/mineflayer-physics-util-1.8.7.tgz#54f20de1a626196bfacef1ecdd6536a3aa09d6c0"
   integrity sha512-wtLYvHqoEFr/j0ny2lyogwjbMvwpFuG2aWI8sI14+EAiGFRpL5+cog2ujSDsnRTZruO7tUXMTiPc1kebjXwfJg==
@@ -302,11 +302,11 @@ minecraft-protocol@^1.51.0:
     uuid-1345 "^1.0.1"
     yggdrasil "^1.4.0"
 
-mineflayer@^4.27.0:
+"mineflayer@git+https://github.com/GenerelSchwerz/mineflayer":
   version "4.27.0"
-  resolved "https://registry.yarnpkg.com/mineflayer/-/mineflayer-4.27.0.tgz#c3668858b0d94ceba1a544304546e03fd9803c8e"
-  integrity sha512-3bxph4jfbkBh5HpeouorxzrfSLNV+i+1gugNJ2jf52HW+rt+tW7eiiFPxrJEsOVkPT/3O/dEIW7j93LRlojMkQ==
+  resolved "git+https://github.com/GenerelSchwerz/mineflayer#d459d2ed76a997af1a7c94718ed7d5dee4478b8a"
   dependencies:
+    "@nxg-org/mineflayer-physics-util" "^1.8.6"
     minecraft-data "^3.76.0"
     minecraft-protocol "^1.51.0"
     prismarine-biome "^1.1.1"

@@ -23,7 +23,7 @@
     "testraw": "node example/basic.js"
   },
   "devDependencies": {
-    "mineflayer": "^4.27.0",
+    "mineflayer": "git+https://github.com/GenerelSchwerz/mineflayer",
     "typescript": "^5.8.3"
   },
   "dependencies": {
