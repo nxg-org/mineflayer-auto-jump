@@ -355,16 +355,16 @@ export class JumpChecker extends BaseSimulator implements JumpCheckerOpts {
 
     const nextTick = this.simulateUntil(
       (state, ticks) => {
-        return state.isInLava || state.isInWater || (ticks > 0 && state.isCollidedVertically);
+        return state.isInLava || state.isInWater || (ticks > 0 && state.onGround);
       },
       (state) => {},
       (state, ticks) => {},
       ectx,
       this.bot.world,
-      999 // unneeded since we'll always be reaching our goal relatively easily.
+      50 // unneeded since we'll always be reaching our goal relatively easily. // APPARENTLY NOT THE CASE.
     );
 
-    return !(nextTick.isCollidedVertically && !nextTick.isInWater);
+    return !(nextTick.onGround && !nextTick.isInWater);
   }
 
   /**
